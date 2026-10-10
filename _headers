@@ -1,0 +1,24 @@
+# Cloudflare Pages 响应头
+# 静态资源长缓存；HTML 不缓存，保证版本号实时
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+/assets/*
+  Cache-Control: public, max-age=604800
+
+/assets/pet/*
+  Cache-Control: public, max-age=2592000
+
+/demo/*
+  Cache-Control: public, max-age=3600
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/releases.json
+  Cache-Control: public, max-age=300

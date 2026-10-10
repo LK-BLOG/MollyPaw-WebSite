@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://mollypaw.pages.dev/sitemap.xml

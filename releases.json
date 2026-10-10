@@ -1,0 +1,79 @@
+{
+  "repo": "LK-BLOG/MollyPaw",
+  "snapshot": true,
+  "releases": [
+    {
+      "tag": "beta-0.0.0.1.5",
+      "name": "MollyPaw Beta 0.0.0.1.5",
+      "published": "2026-09-14T11:34:00Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/beta-0.0.0.1.5",
+      "notes": "# MollyPaw Beta 0.0.0.1.5\r\n\r\n这次把 Agent 基础能力补齐了。\r\n\r\n## 新增\r\n\r\n- API 余额实时刷新，每轮对话结束自动更新\r\n- DeepSeek 多币种余额：`CNY / USD`\r\n- AI 气泡费用显示，仅在供应商明确返回费用时展示\r\n- 上下文管理：\r\n  - 前 10 轮完整保留\r\n  - 中段自动摘要\r\n  - 后 10 轮完整保留\r\n  - 不破坏工具调用链\r\n- 上下文窗口支持 `K / M` 和浮点数，DeepSeek 默认 `1M`\r\n- 睡眠整理机制：\r\n  - 关闭 / 只显示 / 完整\r\n  - 空闲 30 秒进入睡眠\r\n  - 整理记忆\r\n  - 梳理对话\r\n  - 写梦\r\n  - 梦保存为 `dream_年份_月份_日期_序号.md`\r\n- 网络工具：\r\n  - `web_search`：Bing 国际版\r\n  - `fetch`：读取公开网页并清洗正文\r\n  - 拦截 localhost、内网、保留地址和危险跳转\r\n- 聊天框底部权限管理：\r\n  - 请求批准\r\n  - 帮我批准\r\n  - 完全访问\r\n- 点击模型打开思考强度菜单：\r\n  - 无 / 低 / 中 / 高 / 最高\r\n  - 最高档星空背景\r\n- 设置面板拆分为：\r\n  - 模型\r\n  - 权限\r\n  - 睡眠\r\n\r\n## 修复\r\n\r\n- 修复 API Key 被截断后保存的问题\r\n- API Key 输入框改为密码圆点显示\r\n- 修复 DeepSeek thinking 模式缺少 `reasoning_content` 导致的坏请求\r\n- 修复模型只调用工具、不返回最终内容的问题\r\n- 修复工具参数缺失导致 `ExecTool.exec_command() missing cmd`\r\n- 自动修复悬空 tool call，避免下一轮变成非法请求\r\n- 修复睡眠状态刚进入就自动唤醒\r\n- 清理旧长期记忆里的哈希梦文件名规范\r\n- 上床图标 `.ico` 支持多分辨率，不再模糊\r\n- 静态资源禁用缓存，避免 WebView 使用旧 CSS/JS\r\n\r\n## 打包\r\n\r\n- `MollyPaw.exe` 体积小于 40MB\r\n- 排除 PyQt5、PySide6、torch、transformers、aiohttp\r\n- 独立 `.venv` 构建\r\n- ICO 包含：\r\n  - `16 / 24 / 32 / 48 / 64 / 128 / 256`\r\n- 默认配置包含完整 `sleep` 段\r\n\r\n## 下载\r\n\r\n- `MollyPaw.exe`\r\n\r\n## 验证\r\n\r\n- 22 项测试通过\r\n- Python 编译通过\r\n- JavaScript 语法检查通过\r\n- CSS 解析无错误\r\n- PyInstaller 构建通过",
+      "assets": [
+        {
+          "name": "MollyPaw.exe",
+          "size": 28218810,
+          "downloads": 1,
+          "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/beta-0.0.0.1.5/MollyPaw.exe"
+        }
+      ]
+    },
+    {
+      "tag": "Beta-0.0.0.1.4",
+      "name": "MollyPaw Beta 0.0.0.1.4",
+      "published": "2026-09-13T13:45:27Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/Beta-0.0.0.1.4",
+      "notes": "本版本重点升级供应商配置、实时模型拉取和 API 协议支持。\r\n\r\n## 新功能\r\n\r\n- 新增 20 个内置模型供应商：\r\n  - OpenAI\r\n  - DeepSeek\r\n  - Xiaomi MiMo\r\n  - 豆包 / 火山方舟\r\n  - Kimi / Moonshot\r\n  - Qwen / DashScope\r\n  - GLM / 智谱\r\n  - MiniMax\r\n  - Google Gemini\r\n  - OpenRouter\r\n  - SiliconFlow\r\n  - xAI\r\n  - Mistral\r\n  - Groq\r\n  - Together AI\r\n  - Fireworks AI\r\n  - Cerebras\r\n  - NVIDIA NIM\r\n  - DeepInfra\r\n  - Perplexity\r\n- 支持 OpenAI Chat Completions API。\r\n- 支持 OpenAI Responses API。\r\n- DeepSeek 和 Xiaomi MiMo 默认使用 Responses API。\r\n- 设置中可以选择供应商并实时拉取模型列表。\r\n- 模型显示名称自动格式化，例如：\r\n  - `qwen-3.5` → `Qwen 3.5`\r\n  - `deepseek-flash` → `Deepseek Flash`\r\n- 继续支持自定义供应商。\r\n- 自定义供应商可以手动选择 Chat Completions 或 Responses 协议。\r\n- 模型拉取失败时支持手动输入模型 ID。\r\n- Kimi 自动禁用 Temperature 参数。\r\n\r\n## 架构调整\r\n\r\n- 前端与 Python 后端统一改为 HTTP API 通信。\r\n- 移除 `pywebview.api`。\r\n- 移除 `evaluate_js` 回调通信。\r\n- 新增 HTTP 事件轮询接口 `/api/events`。\r\n- 保留旧配置文件兼容和自动迁移。\r\n- 清理 LLM 识图相关残留逻辑。\r\n\r\n## 验证\r\n\r\n- Provider 单元测试通过。\r\n- Python 语法检查通过。\r\n- JavaScript 语法检查通过。\r\n- PyInstaller 打包成功。\r\n\r\n## 文件\r\n\r\n下载 `MollyPaw.exe` 后直接运行即可。\r\n首次使用请在设置中填写 API Key，并点击“拉取模型”。",
+      "assets": [
+        {
+          "name": "MollyPaw.exe",
+          "size": 70730878,
+          "downloads": 1,
+          "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/Beta-0.0.0.1.4/MollyPaw.exe"
+        }
+      ]
+    },
+    {
+      "tag": "Beta-0.0.0.1.3",
+      "name": "Beta 0.0.0.1.3",
+      "published": "2026-08-22T07:24:30Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/Beta-0.0.0.1.3",
+      "notes": "## MollyPaw Beta 0.0.0.1.3\n\n### New Features\n- **Exec Tool**: Execute shell commands (PowerShell/CMD) with danger classification\n- **Skill System**: MD-based skill management (subdirectory structure with SKILL.md)\n- **Long-term Memory**: Persistent memory storage with tags, categories, search\n- **Tool Approval UI**: Visual tool call cards with danger badges, auto-approve or popup approval for dangerous ops\n- **Markdown Rendering**: Full markdown support (tables, lists, code blocks, headings, blockquotes)\n- **i18n**: Chinese/English language toggle\n\n### Fixes\n- Tray and pet survive window close\n- Centralized data paths to APPDATA (frozen) / project data/ (dev)\n- Session auto-naming by AI\n- Links open in system browser\n- Conversation persistence in sidebar\n\n### Security\n- Removed hardcoded API key from tracked scripts\n- Tools classified as safe/moderate/dangerous with configurable approval modes\n\n**Full Changelog**: https://github.com/LK-BLOG/MollyPaw/commits/main",
+      "assets": [
+        {
+          "name": "MollyPaw.exe",
+          "size": 37290626,
+          "downloads": 0,
+          "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/Beta-0.0.0.1.3/MollyPaw.exe"
+        }
+      ]
+    },
+    {
+      "tag": "Beta-0.0.0.1.2",
+      "name": " Beta 0.0.0.1.2 — HTTP API, async chat, pet transparency",
+      "published": "2026-07-30T05:50:42Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/Beta-0.0.0.1.2",
+      "notes": "## 新特性\r\n- 添加桌面宠物\r\n- 桌面宠物透明背景（洪水填充去背景，眼白保留）\r\n- 宠物窗口放大（300x340，图片 220px）\r\n- 宠物气泡框纯白背景\r\n\r\n## 修复\r\n- **UI 不再无响应** — 彻底替换 pywebview js_api，改用本地 HTTP API + fetch() 通信，COM 线程不再阻塞 UI\r\n- **异步聊天** — 所有 API 调用（chat/config/save/clear）在后台线程执行，通过 evaluate_js 推送结果\r\n- **托盘退出关闭桌宠** — 退出时 terminate() 杀掉宠物进程\r\n- **关窗保留托盘** — 关闭窗口后托盘和桌宠继续运行\r\n- **配置路径修复** — 打包后 config.json 保存在 exe 旁边，不再指向临时目录\r\n- **单实例锁** — 文件锁防止重复启动\r\n- **桌宠内嵌** — PetWindow 直接嵌入 main.py，打包后不再依赖子进程\r\n- **API 超时** — 请求超时设为 100000s\r\n- **连接错误静默** — pet server 的 ConnectionAbortedError 不再刷屏\r\n\r\n## 下载\r\n- `MollyPaw.exe`（Windows 独立可执行文件，~32MB）\r\n- 首次运行需在设置面板配置 API Key\r\n\r\n## 已知问题\r\n- 旧进程可能无法被自动关闭，需手动从任务管理器结束",
+      "assets": [
+        {
+          "name": "MollyPaw.exe",
+          "size": 33648811,
+          "downloads": 1,
+          "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/Beta-0.0.0.1.2/MollyPaw.exe"
+        }
+      ]
+    },
+    {
+      "tag": "v0.0.0.1.1",
+      "name": "Beta 0.0.0.1.1",
+      "published": "2026-07-26T10:01:24Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/v0.0.0.1.1",
+      "notes": "Tool calling support - agent now knows its tools",
+      "assets": []
+    }
+  ]
+}

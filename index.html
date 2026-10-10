@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-mode="lite">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MollyPaw — 你的 AI，就在爪子边</title>
+<meta name="description" content="MollyPaw 是一个装在你自己电脑上的 AI 助手，免费开源。不用写代码，下载就能用；开发者也能直接改 Python 源码。">
+<meta name="theme-color" content="#6B4226">
+<meta property="og:title" content="MollyPaw — 你的 AI，就在爪子边">
+<meta property="og:description" content="装在自己电脑上的 AI 助手，能真的替你干活，还带一只桌面宠物。免费开源。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/shots/app-chat.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1640">
+<meta property="og:image:alt" content="MollyPaw 界面：和桌面 AI 助手对话，它正在整理文件">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/shots/app-chat.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="image" href="assets/pet/idle.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<!-- 首屏渲染前定好模式，避免闪一下 -->
+<script>
+(function () {
+  var m = null;
+  try {
+    m = new URLSearchParams(location.search).get('mode');
+    if (m !== 'dev' && m !== 'lite') {
+      var s = localStorage.getItem('mollypaw-mode');
+      m = (s === 'dev' || s === 'lite') ? s : 'lite';
+    }
+  } catch (e) { m = 'lite'; }
+  document.documentElement.setAttribute('data-mode', m);
+})();
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="MollyPaw 首页">
+      <svg class="brand-paw" viewBox="0 0 120 120" aria-hidden="true">
+        <ellipse cx="60" cy="76" rx="27" ry="23" fill="currentColor"/>
+        <ellipse cx="27" cy="45" rx="12" ry="14" fill="currentColor"/>
+        <ellipse cx="60" cy="34" rx="12" ry="14" fill="currentColor"/>
+        <ellipse cx="93" cy="45" rx="12" ry="14" fill="currentColor"/>
+      </svg>
+      <span class="brand-text">Molly<em>Paw</em></span>
+    </a>
+
+    <nav class="nav-links" id="navLinks" aria-label="主导航">
+      <a href="#features"><span class="only-lite">它能做什么</span><span class="only-dev">特性</span></a>
+      <a href="#tryon"><span class="only-lite">先试试</span><span class="only-dev">Demo</span></a>
+      <a href="#download">下载</a>
+      <a href="#pet">宠物</a>
+      <a href="#compare"><span class="only-lite">好在哪</span><span class="only-dev">对比</span></a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav-actions">
+      <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="内容版本切换">
+        <button type="button" class="ms-btn" data-mode="lite" role="tab" aria-selected="true" title="给普通用户看的版本">小白版</button>
+        <button type="button" class="ms-btn" data-mode="dev" role="tab" aria-selected="false" title="给开发者看的版本">技术版</button>
+        <span class="ms-thumb" aria-hidden="true"></span>
+      </div>
+      <button class="mode-btn-mobile" id="modeBtnMobile" type="button" aria-label="切换内容版本">
+        <span class="ms-label">小白版</span>
+      </button>
+      <a class="btn btn-ghost" href="https://github.com/LK-BLOG/MollyPaw" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true" class="ico"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="btn btn-primary" href="#download">
+        <span class="only-lite">免费下载</span><span class="only-dev">免费下载</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="打开菜单" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero" id="top">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <span class="pill">
+          <span class="pill-dot"></span> <span class="ver-name" data-ver="name">Beta 0.0.0.1.5</span>
+          <span class="ver-sep">·</span> <span class="ver-date" data-ver="date"></span>
+          <span class="ver-sep">·</span> 开源 GPLv3
+        </span>
+        <h1>你的 AI，<br>就在<span class="hl">爪子</span>边。</h1>
+        <p class="slogan">“Your AI, right at your paw.”</p>
+
+        <!-- 小白版 -->
+        <div class="only-lite">
+          <p class="lede">
+            它是一个<strong>装在你电脑上</strong>的 AI 助手。
+            不用注册账号，不用打开浏览器登录。你想让它干嘛，打一行字就行 ——
+            整理文件、看文档、改代码，它<strong>真的会动手做</strong>。
+            旁边还有一只小泰迪陪着你。
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg js-download is-disabled" href="#download" aria-disabled="true" data-dl="primary">
+              下载 Windows 版
+            </a>
+            <a class="btn btn-outline btn-lg" href="#download">下载慢？换条线路</a>
+          </div>
+          <ul class="hero-meta">
+            <li><strong>免费</strong>，开源不锁功能</li>
+            <li>下载完<strong>双击就能用</strong></li>
+            <li>你的文件<strong>不出你电脑</strong></li>
+          </ul>
+        </div>
+
+        <!-- 技术版 -->
+        <div class="only-dev">
+          <p class="lede">
+            MollyPaw 是基于 <strong>Python + PyWebView</strong> 的轻量级 AI Agent 桌面客户端。
+            不用装 Rust，不用装 Node.js —— <strong>只要 Python</strong>，pip 完就跑。
+            它跑在你自己的机器上，接你自己的模型，还有一只小泰迪陪着你。
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg js-download is-disabled" href="#download" aria-disabled="true" data-dl="primary">下载 Windows 版</a>
+            <a class="btn btn-outline btn-lg" href="#start">三行命令跑起来</a>
+          </div>
+          <ul class="hero-meta">
+            <li><strong>Python ≥ 3.9</strong> 唯一依赖</li>
+            <li><strong>零</strong> Node.js / Rust</li>
+            <li><strong>Windows</strong> 有打包版可下</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="hero-stage">
+        <div class="pet-card" id="heroPetCard">
+          <div class="pet-halo" aria-hidden="true"></div>
+          <img id="heroPet" class="pet-img" src="assets/pet/idle.png" alt="MollyPaw 桌面宠物：摩尼" width="512" height="512">
+          <div class="pet-chip" id="heroChip"><span class="dot"></span> 摩尼正在待命</div>
+        </div>
+        <div class="stage-badge stage-badge-a">桌面宠物</div>
+        <div class="stage-badge stage-badge-b"><span class="only-lite">本地运行</span><span class="only-dev">PyWebView</span></div>
+        <div class="stage-badge stage-badge-c"><span class="only-lite">开源免费</span><span class="only-dev">Python</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TICKER ══════════ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>只要 Python</span><span>·</span>
+      <span>启动快 · 体积小</span><span>·</span>
+      <span>任意 OpenAI 兼容模型</span><span>·</span>
+      <span>桌面宠物实时同步</span><span>·</span>
+      <span>本地运行</span><span>·</span>
+      <span>开源免费</span><span>·</span>
+      <span>只要 Python</span><span>·</span>
+      <span>启动快 · 体积小</span><span>·</span>
+      <span>任意 OpenAI 兼容模型</span><span>·</span>
+      <span>桌面宠物实时同步</span><span>·</span>
+      <span>本地运行</span><span>·</span>
+      <span>开源免费</span><span>·</span>
+    </div>
+  </div>
+
+  <!-- ══════════ FEATURES ══════════ -->
+  <section class="section" id="features">
+    <div class="wrap">
+
+      <!-- 小白版 -->
+      <div class="only-lite">
+        <header class="sec-head">
+          <span class="eyebrow">它能做什么</span>
+          <h2>不是只会聊天，<em>它真的动手</em></h2>
+          <p>你说话，它干活。说人话就行，不用学什么提示词。</p>
+        </header>
+        <div class="grid grid-3">
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+            </div>
+            <h3>下载完，双击就能用</h3>
+            <p>不需要装开发环境，不需要敲命令。下载一个文件，双击打开，填一次你的 API 钥匙，之后就正常用。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l1 3h4v13H4V7h4z"/><path d="M9 11.5a3 3 0 0 0 6 0"/></svg>
+            </div>
+            <h3>它真的会帮你动手</h3>
+            <p>不是给你一堆建议让你自己弄。整理文件夹、读文档、改代码 —— 你交代的事它直接做完，再告诉你结果。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg class="ico-fill" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="15.6" rx="4.9" ry="4.2"/><ellipse cx="5.6" cy="9.4" rx="2.2" ry="2.6"/><ellipse cx="12" cy="7.4" rx="2.2" ry="2.6"/><ellipse cx="18.4" cy="9.4" rx="2.2" ry="2.6"/></svg>
+            </div>
+            <h3>一只小泰迪陪着你</h3>
+            <p>它叫摩尼。你让它干活它会翻书用功，出错它会哭给你看，你不理它它就趴下睡觉。桌面上的活宠物。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3>东西都在你自己电脑上</h3>
+            <p>聊天记录和文件都留在本地，不会偷偷传给别人。用本地模型的话，断网也能用。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9"/><path d="M14.6 9.8c-.5-.9-1.5-1.4-2.6-1.4-1.4 0-2.5.8-2.5 1.9 0 2.6 5.4 1.3 5.4 3.9 0 1.1-1.1 1.9-2.6 1.9-1.1 0-2.1-.5-2.6-1.4"/></svg>
+            </div>
+            <h3>免费，是真免费</h3>
+            <p>代码全公开，没有会员，没有功能墙。你只需要付给模型提供方该付的钱；用本地模型就一分不花。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M17.5 3.5a2.1 2.1 0 0 1 3 3L12 15l-3 .7.7-3z"/></svg>
+            </div>
+            <h3>想换谁家的「脑子」都行</h3>
+            <p>今天用这家，明天换那家，界面完全不变。填个地址和钥匙就切过去了，不重装。</p>
+          </article>
+        </div>
+      </div>
+
+      <!-- 技术版 -->
+      <div class="only-dev">
+        <header class="sec-head">
+          <span class="eyebrow">特性</span>
+          <h2>该有的都有，不该重的<em>一点不重</em></h2>
+          <p>不是又一个 Electron 套壳。MollyPaw 把重量留给了 Python 的简单。</p>
+        </header>
+        <div class="grid grid-3">
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>
+            </div>
+            <h3>超轻量</h3>
+            <p>没有 Rust，没有 Node.js，没有 npm。一个 <code>pip install</code>，一个 <code>python main.py</code>，完事。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2.2"/><path d="M8.5 21h7M12 17v4"/></svg>
+            </div>
+            <h3>Windows 原生</h3>
+            <p>就是给 Windows 做的。系统托盘、宠物子进程、WebView2 都按 Windows 写的，不假装跨平台。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
+            </div>
+            <h3>启动快、体积小</h3>
+            <p>不背 Chromium 的包袱。冷启动就是开一个本机窗口，界面渲染走系统 WebView。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+            </div>
+            <h3>接你自己的模型</h3>
+            <p>OpenAI / Claude / 本地模型 —— 只要是 OpenAI 兼容接口，填个 API Key 和 base_url 就能用。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg class="ico-fill" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="15.6" rx="4.9" ry="4.2"/><ellipse cx="5.6" cy="9.4" rx="2.2" ry="2.6"/><ellipse cx="12" cy="7.4" rx="2.2" ry="2.6"/><ellipse cx="18.4" cy="9.4" rx="2.2" ry="2.6"/></svg>
+            </div>
+            <h3>桌面宠物</h3>
+            <p>摩尼是独立进程的小泰迪，每秒同步 Agent 状态：待命、干活、崩溃、摸鱼睡觉。</p>
+          </article>
+          <article class="card reveal">
+            <div class="card-ico">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg>
+            </div>
+            <h3>工具可以自己长</h3>
+            <p>定义一个 Python 类，写上 TOOLS 和 execute，注册进 ToolRegistry —— Agent 立刻多一只手。</p>
+          </article>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ QUICKSTART ══════════ -->
+  <section class="section section-alt" id="start">
+    <div class="wrap">
+
+      <!-- 小白版 -->
+      <div class="only-lite">
+        <header class="sec-head">
+          <span class="eyebrow">怎么用</span>
+          <h2>三步，<em>十分钟以内</em></h2>
+          <p>会用微信，就会用这个。</p>
+        </header>
+
+        <div class="start-grid">
+          <ol class="steps">
+            <li class="reveal">
+              <span class="step-num">1</span>
+              <div>
+                <h3>下载</h3>
+                <p>去 Release 页面下 <code>MollyPaw.exe</code>，放到桌面就行，不用安装。</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="step-num">2</span>
+              <div>
+                <h3>粘贴钥匙</h3>
+                <p>双击打开，点右上角设置，把你从模型官网复制来的 API Key 粘进去，保存。</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="step-num">3</span>
+              <div>
+                <h3>开聊</h3>
+                <p>在下面的输入框里说你要干嘛。比如「帮我把下载文件夹里的图片按月份分好」。</p>
+              </div>
+            </li>
+          </ol>
+
+          <aside class="plain-card reveal">
+            <h3>🔑 API 钥匙是什么？</h3>
+            <p>AI 不是免费的公共设施，它由各家厂商提供。你要先去厂商网站注册一个账号，拿到一串「钥匙」，填进 MollyPaw，它才能替你问 AI。</p>
+            <p class="muted">常见去处：DeepSeek、Kimi、通义、OpenAI、Anthropic。价格按用量算，聊天级别一个月通常几块钱。</p>
+            <div class="plain-tip">
+              <strong>不想花钱？</strong> 用本地的开源模型，全程离线、零费用，但要你自己装一次模型。装好之后在设置里把地址填成本机地址就行。
+            </div>
+            <button class="btn btn-outline btn-block switch-hint" data-goto-mode="dev" type="button">
+              我是开发者，给我看技术版 →
+            </button>
+          </aside>
+        </div>
+      </div>
+
+      <!-- 技术版 -->
+      <div class="only-dev">
+        <header class="sec-head">
+          <span class="eyebrow">快速开始</span>
+          <h2>从零到跑起来，<em>两分钟</em></h2>
+          <p>唯一的前置条件：装好 Python 3.9 或更高版本。</p>
+        </header>
+
+        <div class="start-grid">
+          <ol class="steps">
+            <li class="reveal">
+              <span class="step-num">1</span>
+              <div>
+                <h3>拿代码</h3>
+                <p>克隆仓库，或者直接下 Release 里的 <code>MollyPaw.exe</code>。</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="step-num">2</span>
+              <div>
+                <h3>装依赖</h3>
+                <p>只要一条命令。pywebview、requests、pillow 这些就位。</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="step-num">3</span>
+              <div>
+                <h3>启动</h3>
+                <p>开设置面板填 API Key，然后开始聊。要调试就加 <code>--debug</code>。</p>
+              </div>
+            </li>
+          </ol>
+
+          <div class="code-card reveal">
+            <div class="code-bar">
+              <span class="code-title">终端</span>
+              <button class="copy-btn" id="copyBtn" data-copy="git clone https://github.com/LK-BLOG/MollyPaw.git&#10;cd MollyPaw&#10;pip install -r requirements.txt&#10;python main.py">
+                <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 9h10v12H9zM5 15V3h10"/></svg>
+                <span>复制</span>
+              </button>
+            </div>
+<pre class="code"><code><span class="c-comment"># 1. 克隆仓库</span>
+<span class="c-cmd">git clone</span> https://github.com/LK-BLOG/MollyPaw.git
+<span class="c-cmd">cd</span> MollyPaw
+
+<span class="c-comment"># 2. 安装依赖</span>
+<span class="c-cmd">pip install</span> -r requirements.txt
+
+<span class="c-comment"># 3. 启动</span>
+<span class="c-cmd">python</span> main.py
+
+<span class="c-comment"># 调试模式（打开 webview devtools）</span>
+<span class="c-cmd">python</span> main.py --debug</code></pre>
+            <div class="code-foot">
+              <span class="tag">Windows 10 / 11</span>
+              <span class="code-note">打包 exe：<code>.\build.bat</code> → <code>dist\MollyPaw.exe</code></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ DOWNLOAD ══════════ -->
+  <section class="section dl-section" id="download">
+    <div class="wrap">
+      <header class="sec-head">
+        <span class="eyebrow">下载</span>
+        <h2 class="only-lite">点一下就下载，<em>不用注册</em></h2>
+        <h2 class="only-dev">下载 / 镜像 / 校验</h2>
+        <p class="only-lite">版本信息直接从 GitHub 实时读取，不会给你过期的安装包。</p>
+        <p class="only-dev">版本与资产列表从 GitHub Releases 实时拉取；本地 <code>releases.json</code> 仅作离线兜底。</p>
+      </header>
+
+      <!-- 实时版本卡 -->
+      <div class="ver-block reveal">
+        <div class="ver-top">
+          <div class="ver-badge">
+            <span class="ver-dot"></span>
+            <span class="ver-label">最新版本</span>
+            <strong class="ver-name" data-ver="name">读取中…</strong>
+          </div>
+          <div class="ver-meta-line">
+            <span class="ver-date" data-ver="date"></span>
+            <span class="ver-src" data-ver="source">正在连 GitHub…</span>
+            <button class="link-btn ver-refresh" id="verRefresh" type="button">重新获取</button>
+          </div>
+        </div>
+
+        <div class="ver-actions">
+          <a class="btn btn-primary btn-lg js-download is-disabled" href="#download" aria-disabled="true" data-dl="primary">
+            <svg viewBox="0 0 24 24" class="ico-line" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+            <span class="only-lite">下载 MollyPaw</span><span class="only-dev">下载 MollyPaw.exe</span>
+            <em class="dl-size" data-ver="size"></em>
+          </a>
+          <a class="btn btn-outline btn-lg" href="#download">
+            下载慢？换条线路
+          </a>
+        </div>
+        <p class="ver-route" data-ver="route">正在测速，下载按钮会自动指向最快的节点…</p>
+
+        <p class="ver-warn" data-ver="error" hidden></p>
+      </div>
+
+      <!-- 国内加速镜像 -->
+      <div class="mirror-box reveal">
+        <div class="mirror-head">
+          <h3>🐾 国内下载慢 / 打不开？</h3>
+          <p>GitHub 在国内经常被墙或龟速。主下载按钮已经会自动挑最快的加速节点；下面每个节点的耗时都是<strong>你本机实测</strong>的，文件与官方完全一致。</p>
+        </div>
+        <div class="mirror-list" id="mirrorList">
+          <p class="mirror-loading">正在测速…</p>
+        </div>
+        <p class="mirror-foot muted">测速用的是真实 Range 请求（只下 1 字节），耗时反映的是你到该节点的握手与首包速度。节点挂了就在 <code>assets/js/main.js</code> 的 <code>MIRRORS</code> 里换一条。</p>
+      </div>
+
+      <!-- 小白版：安装说明 -->
+      <div class="only-lite">
+        <div class="plain-card reveal install-card">
+          <h3>下载之后怎么弄？</h3>
+          <ol class="install-steps">
+            <li>Windows 可能会弹「已保护你的电脑」。点「<strong>更多信息</strong>」→「<strong>仍要运行</strong>」。这是没买签名证书的正常现象，不是病毒。</li>
+            <li>文件放桌面就行，<strong>不需要安装</strong>。以后想删掉直接删文件。</li>
+            <li>第一次打开会让你填 API 钥匙。没钥匙先去模型官网注册一个，复制过来粘上。</li>
+            <li>填完就能聊了。旁边那只狗是摩尼，点它可以跟它玩。</li>
+          </ol>
+          <div class="plain-tip">
+            <strong>找不到 API 钥匙？</strong> 小白推荐先试 <strong>DeepSeek</strong>：官网注册 → 充值几块钱 → 在「API Keys」页面新建一个 → 复制以 <code>sk-</code> 开头的那串。然后打开 MollyPaw 设置，供应商选 DeepSeek，把钥匙粘进去即可。
+          </div>
+        </div>
+
+        <div class="plain-card reveal warn-card">
+          <h3>⚠️ 只有 Windows 版</h3>
+          <p>MollyPaw 是<strong>Windows 原生应用</strong>，不是"跨平台套壳"。系统托盘、桌面宠物、WebView2 全部按 Windows 实现。</p>
+          <p class="muted">macOS / Linux 没有支持，也没有计划——别等，等不到。</p>
+        </div>
+      </div>
+
+      <!-- 技术版：校验与安装 -->
+      <div class="only-dev">
+        <div class="start-grid">
+          <div class="code-card reveal">
+            <div class="code-bar">
+              <span class="code-title">校验下载文件</span>
+              <button class="copy-btn" id="sumCopyBtn" data-copy="" type="button">
+                <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 9h10v12H9zM5 15V3h10"/></svg>
+                <span>复制</span>
+              </button>
+            </div>
+<pre class="code"><code><span class="c-comment"># 下载后校验完整性（PowerShell）</span>
+<span class="c-cmd">Get-FileHash</span> .\MollyPaw.exe -Algorithm SHA256
+
+<span class="c-comment"># 期望值（若能取到）</span>
+<span class="c-cmd" id="sumLine">计算中…</span></code></pre>
+            <div class="code-foot">
+              <span class="tag">SHA256</span>
+              <span class="code-note">Release 未附带校验文件时，用镜像下载同样不可校验，谨慎。</span>
+            </div>
+          </div>
+          <div class="plain-card reveal">
+            <h3>运行要求</h3>
+            <p><strong>Windows 版（预打包）</strong>：Windows 10 / 11 64 位，直接双击，无需 Python。</p>
+            <p><strong>从源码跑</strong>：Python ≥ 3.9，<code>pip install -r requirements.txt</code>，然后 <code>python main.py</code>。</p>
+            <p class="muted">只支持 Windows 10 / 11 64 位。macOS / Linux 跑了也是坏的——系统托盘和宠物那两个模块根本没做适配，别试。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 完整发布记录 -->
+      <details class="rel-details reveal">
+        <summary>全部版本记录</summary>
+        <div class="rel-list" id="relList">
+          <p class="mirror-loading">正在读取…</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ══════════ 在线试用 ══════════ -->
+  <section class="section tryon" id="tryon">
+    <div class="wrap">
+      <header class="sec-head">
+        <span class="eyebrow">在线试用</span>
+        <h2 class="only-lite">不用下载，<em>先点两下试试</em></h2>
+        <h2 class="only-dev">在线 Demo · 就是真实前端</h2>
+        <p class="only-lite">这就是软件本来的样子，左边点对话，右边随便点。发消息被锁了——真聊起来得下载后接你自己的模型。</p>
+        <p class="only-dev">这个 Demo 跑的是主仓库 <code>frontend/</code> 的真实代码，只把 <code>/api/*</code> 换成了假响应。可以切对话、翻历史、开设置看配置项。</p>
+      </header>
+
+      <div class="tryon-frame reveal">
+        <div class="tryon-bar">
+          <span class="tryon-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="tryon-title">MollyPaw — 演示实例（假数据）</span>
+          <a class="tryon-open" href="demo/index.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+        </div>
+        <div class="tryon-body">
+          <iframe
+            src="demo/index.html"
+            title="MollyPaw 在线演示"
+            loading="lazy"
+            referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
+
+      <p class="tryon-hint">
+        💡 演示模式下<strong>发不出消息</strong>，别的都能点。想真聊 → 下载后填你自己的 API Key。
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════ PET ══════════ -->
+  <section class="section" id="pet">
+    <div class="wrap">
+      <header class="sec-head">
+        <span class="eyebrow">桌面宠物</span>
+        <h2 class="only-lite">摩尼会<em>替 AI 表达心情</em></h2>
+        <h2 class="only-dev">摩尼会<em>替 Agent 表达情绪</em></h2>
+        <p class="only-lite">它在干嘛，你不用看日志，看一眼狗就行。点下面四个卡片试试。</p>
+        <p class="only-dev">主进程维护状态，宠物进程每秒轮询一次 —— 它在干嘛，你看一眼就知道。</p>
+      </header>
+
+      <div class="pet-grid" id="petGrid">
+        <button class="pet-card-sm reveal" data-state="idle" data-chip="摩尼正在待命">
+          <img src="assets/pet/idle.png" alt="摩尼：待命状态" loading="lazy" width="512" height="512">
+          <h3>idle · 待命</h3>
+          <p>没在干活，摇着尾巴等你开口。</p>
+        </button>
+        <button class="pet-card-sm reveal" data-state="work" data-chip="摩尼正在干活">
+          <img src="assets/pet/work.png" alt="摩尼：工作状态" loading="lazy" width="512" height="512">
+          <h3>work · 干活</h3>
+          <p class="only-lite">它正在帮你做事，别打扰。</p>
+          <p class="only-dev">Agent 正在跑工具、调模型、思考中。</p>
+        </button>
+        <button class="pet-card-sm reveal" data-state="cry" data-chip="摩尼出问题了">
+          <img src="assets/pet/cry.png" alt="摩尼：出错状态" loading="lazy" width="512" height="512">
+          <h3>cry · 出错</h3>
+          <p class="only-lite">出问题了。它比你还急，去看看提示。</p>
+          <p class="only-dev">报错了。它比你还急，赶紧看看日志。</p>
+        </button>
+        <button class="pet-card-sm reveal" data-state="sleep" data-chip="摩尼睡着了">
+          <img src="assets/pet/sleep.png" alt="摩尼：睡眠状态" loading="lazy" width="512" height="512">
+          <h3>sleep · 睡觉</h3>
+          <p>你不管它的时候，它自己找个角落眯着。</p>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ COMPARE ══════════ -->
+  <section class="section section-alt" id="compare">
+    <div class="wrap">
+
+      <!-- 小白版 -->
+      <div class="only-lite">
+        <header class="sec-head">
+          <span class="eyebrow">好在哪</span>
+          <h2>和网页版 AI <em>有什么不一样</em></h2>
+          <p>网页版是「聊完就没」，MollyPaw 是「真住进你电脑里」。</p>
+        </header>
+        <div class="table-wrap reveal">
+          <table class="cmp">
+            <thead>
+              <tr><th>比一比</th><th class="col-us">MollyPaw</th><th>网页版 AI</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>它能不能碰你的文件</td><td class="col-us"><span class="yes">能，你授权就行</span></td><td>不能，你得自己复制粘贴</td></tr>
+              <tr><td>关掉浏览器还在吗</td><td class="col-us"><span class="yes">一直在，还有宠物在桌面</span></td><td>标签页一关就没了</td></tr>
+              <tr><td>要不要注册账号</td><td class="col-us"><span class="yes">不用，装完就用</span></td><td>要登录，还限次数</td></tr>
+              <tr><td>你的文件去哪了</td><td class="col-us"><span class="yes">留在你电脑本地</span></td><td>全部上传到对方服务器</td></tr>
+              <tr><td>要钱吗</td><td class="col-us"><span class="yes">程序免费，用多少付多少</span></td><td>免费版限速，会员才能用</td></tr>
+              <tr><td>能不能换模型</td><td class="col-us"><span class="yes">随便换，界面不变</span></td><td>只能用他家的</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 技术版 -->
+      <div class="only-dev">
+        <header class="sec-head">
+          <span class="eyebrow">凭什么</span>
+          <h2>和常见 Electron 套壳<em>比一比</em></h2>
+          <p>MollyPaw 的取舍很清楚：不为了漂亮界面把一百兆运行时塞进你硬盘。</p>
+        </header>
+        <div class="table-wrap reveal">
+          <table class="cmp">
+            <thead>
+              <tr><th>对比项</th><th class="col-us">MollyPaw</th><th>典型 Electron 客户端</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>运行时依赖</td><td class="col-us"><span class="yes">只要 Python</span></td><td>Node.js + 整棵 node_modules</td></tr>
+              <tr><td>安装包体积</td><td class="col-us"><span class="yes">轻</span></td><td>100 MB 起步</td></tr>
+              <tr><td>上手门槛</td><td class="col-us"><span class="yes">pip install</span></td><td>前端工具链 + 构建脚本</td></tr>
+              <tr><td>界面渲染</td><td class="col-us"><span class="yes">系统 WebView</span></td><td>内嵌 Chromium</td></tr>
+              <tr><td>Agent 逻辑</td><td class="col-us"><span class="yes">纯 Python，随手改</span></td><td>JS 进程 + 主进程通信</td></tr>
+              <tr><td>额外送</td><td class="col-us"><span class="yes">一只桌面宠物</span></td><td>无</td></tr>
+              <tr><td>许可证</td><td class="col-us"><span class="yes">GPLv3 自由</span></td><td>各家不同</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ ROADMAP ══════════ -->
+  <section class="section" id="roadmap">
+    <div class="wrap">
+
+      <div class="only-lite">
+        <header class="sec-head">
+          <span class="eyebrow">进度</span>
+          <h2>现在能用的，<em>和接下来要做的</em></h2>
+          <p>不画大饼。左边是已经装进你手里的事实，右边是排队中的。</p>
+        </header>
+        <div class="road">
+          <article class="road-item done reveal">
+            <span class="road-badge">已能用</span>
+            <h3>聊天</h3>
+            <p>打字就能问，中文英文都行，回答可以复制走。</p>
+          </article>
+          <article class="road-item done reveal">
+            <span class="road-badge">已能用</span>
+            <h3>动手干活</h3>
+            <p>读文件、写文件、看文件夹，交给它就行。</p>
+          </article>
+          <article class="road-item done reveal">
+            <span class="road-badge">已能用</span>
+            <h3>桌面宠物</h3>
+            <p>摩尼住在你桌面上，实时反映干活状态。</p>
+          </article>
+          <article class="road-item todo reveal">
+            <span class="road-badge">已能用</span>
+            <h3>记得住事</h3>
+            <p>你告诉过它的偏好和要求，它跨对话记着。后台还会在空闲时「睡一觉」，把重要的事整理进记忆。</p>
+          </article>
+          <article class="road-item todo reveal">
+            <span class="road-badge">排队中</span>
+            <h3>手机端</h3>
+            <p>现在只有电脑版。手机版还没排上，别催。</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="only-dev">
+        <header class="sec-head">
+          <span class="eyebrow">路线图</span>
+          <h2>四个里程碑，<em>全绿</em></h2>
+          <p>Beta 0.0.0.1.5 已经全部落地，剩下的都是增量。</p>
+        </header>
+        <div class="road">
+          <article class="road-item done reveal">
+            <span class="road-badge">已完成</span>
+            <h3>里程碑 1 · 基础框架</h3>
+            <p>目录结构、品牌指南、README、PyWebView 入口、临时 Logo。</p>
+          </article>
+          <article class="road-item done reveal">
+            <span class="road-badge">已完成</span>
+            <h3>里程碑 2 · Agent 核心</h3>
+            <p>AgentCore 工具调用循环、OpenAI 兼容 Provider、文件工具。</p>
+          </article>
+          <article class="road-item done reveal">
+            <span class="road-badge">已完成</span>
+            <h3>里程碑 3 · 前端界面</h3>
+            <p>聊天界面、消息气泡、棕白配色、HTTP 通信与事件轮询。</p>
+          </article>
+          <article class="road-item done reveal">
+            <span class="road-badge">已完成</span>
+            <h3>里程碑 4 · 完善与发布</h3>
+            <p>设置面板、错误处理、系统托盘、PyInstaller 打包、GitHub 发布。</p>
+          </article>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ FAQ ══════════ -->
+  <section class="section section-alt" id="faq">
+    <div class="wrap wrap-narrow">
+
+      <div class="only-lite">
+        <header class="sec-head">
+          <span class="eyebrow">FAQ</span>
+          <h2>你可能想问的</h2>
+        </header>
+        <div class="faq">
+          <details open>
+            <summary>我完全不会写代码，能用吗？</summary>
+            <p>能。你是使用者，不是开发者。下载 exe、双击、粘一次 API Key，剩下的就是打字聊天。</p>
+          </details>
+          <details>
+            <summary>要我注册账号吗？</summary>
+            <p>MollyPaw 自己不需要账号。但你得有一个 AI 模型提供方的账号，因为 AI 是那边在算钱。</p>
+          </details>
+          <details>
+            <summary>要花多少钱？</summary>
+            <p>程序本身永久免费。模型按用量计费，普通聊天一个月几块钱；用本地模型就是零成本。</p>
+          </details>
+          <details>
+            <summary>我的文件安全吗？</summary>
+            <p>程序在你电脑上跑，文件也在本地。只有你主动让它做的事，内容才会发给你配置的那家模型。</p>
+          </details>
+          <details>
+            <summary>它到底能帮我做什么？</summary>
+            <p>整理下载文件夹、把一堆文档读成摘要、翻译、改代码、批量重命名、写脚本 —— 你描述目标，它动手。</p>
+          </details>
+          <details>
+            <summary>它记不记得住我说过的话？</summary>
+            <p>记得。你在一个对话里的上下文它保持；你告诉过它的长期偏好和要求，它也会记下来，换个对话照样认。它还会在空闲时自己「睡一觉」，把重要的事整理进长期记忆，不重要的丢掉。</p>
+          </details>
+          <details>
+            <summary>GitHub 打不开，下载不动怎么办？</summary>
+            <p>正常，国内直连 GitHub 就是会抽。用上面的<strong>国内加速镜像</strong>，随便挑一个，下下来的文件跟官方一模一样。</p>
+          </details>
+          <details>
+            <summary>Windows 说「已保护你的电脑」？</summary>
+            <p>因为我们没买代码签名证书（那玩意儿挺贵）。点「更多信息」→「仍要运行」就行。不放心可以不装。</p>
+          </details>
+          <details>
+            <summary>那只狗能关掉吗？</summary>
+            <p>能。宠物是独立的小窗口，关掉完全不影响聊天。</p>
+          </details>
+          <details>
+            <summary>装了打不开怎么办？</summary>
+            <p>先确认系统是 Windows 10/11。还是不行的话去 GitHub 提个 Issue，把报错截图贴上去。</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="only-dev">
+        <header class="sec-head">
+          <span class="eyebrow">FAQ</span>
+          <h2>你可能想问的</h2>
+        </header>
+        <div class="faq">
+          <details open>
+            <summary>要花钱吗？</summary>
+            <p>MollyPaw 本身免费，GPLv3 开源。你只需要自己付模型 API 的钱，用本地模型就是零成本。</p>
+          </details>
+          <details>
+            <summary>支持哪些模型？</summary>
+            <p>任何 OpenAI 兼容接口，包括 OpenAI、Claude（兼容网关）、以及本地部署的模型。设置面板里填 API Key、base_url、模型名即可。</p>
+          </details>
+          <details>
+            <summary>必须联网吗？</summary>
+            <p>程序本地运行，数据只发给你在设置里填的那个 API 地址。用本地模型就完全离线。</p>
+          </details>
+          <details>
+            <summary>那只狗能关掉吗？</summary>
+            <p>能。宠物是独立进程，关掉不影响主程序聊天。</p>
+          </details>
+          <details>
+            <summary>我能给它加工具吗？</summary>
+            <p>可以。定义一个 Python 类，提供 <code>TOOLS</code> 和 <code>execute()</code>，注册进 ToolRegistry 就完事。</p>
+          </details>
+          <details>
+            <summary>为什么不用 Electron？</summary>
+            <p>因为目标用户不需要为了一个聊天窗口装一百多兆的运行时。能 pip 解决的事，不引入构建链。</p>
+          </details>
+          <details>
+            <summary>站点的版本号哪来的？</summary>
+            <p>前端直接请求 <code>api.github.com/repos/LK-BLOG/MollyPaw/releases</code>（带 CORS，每 IP 每小时 60 次），版本号、发布时间、资产大小、历史记录全部实时取。请求失败时回落到同目录的静态快照 <code>releases.json</code>。</p>
+          </details>
+          <details>
+            <summary>国内拉不到 Release 怎么办？</summary>
+            <p>页面里的镜像列表会并行探一次 <code>HEAD</code> 到各加速节点的真实资产地址，把通的排前面。加速节点列表在 <code>assets/js/main.js</code> 里，挂了自己加。</p>
+          </details>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ CTA ══════════ -->
+  <section class="cta-band">
+    <div class="wrap cta-inner">
+      <img class="cta-pet" src="assets/pet/idle.png" alt="" aria-hidden="true" loading="lazy" width="512" height="512">
+      <h2 class="only-lite">先下下来，试十分钟</h2>
+      <h2 class="only-dev">把它抱回家吧</h2>
+      <p class="only-lite">不好用删掉就行，不花钱、不注册、不留东西。</p>
+      <p class="only-dev">克隆仓库，三行命令，你的私人 Agent 就上线了。</p>
+      <div class="hero-cta center">
+        <a class="btn btn-primary btn-lg js-download is-disabled" href="#download" aria-disabled="true" data-dl="primary">下载最新版</a>
+        <a class="btn btn-outline btn-lg" href="https://github.com/LK-BLOG/MollyPaw" target="_blank" rel="noopener">
+          <span class="only-lite">看看它长什么样</span><span class="only-dev">去 GitHub 拿源码</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <div class="foot-brand">
+      <span class="brand">
+        <svg class="brand-paw" viewBox="0 0 120 120" aria-hidden="true">
+          <ellipse cx="60" cy="76" rx="27" ry="23" fill="currentColor"/>
+          <ellipse cx="27" cy="45" rx="12" ry="14" fill="currentColor"/>
+          <ellipse cx="60" cy="34" rx="12" ry="14" fill="currentColor"/>
+          <ellipse cx="93" cy="45" rx="12" ry="14" fill="currentColor"/>
+        </svg>
+        <span class="brand-text">Molly<em>Paw</em></span>
+      </span>
+      <p>你的 AI，就在爪子边。<br><span class="muted">Your AI, right at your paw.</span></p>
+      <div class="foot-mode">
+        <span>当前内容：<strong id="footModeName">小白版</strong></span>
+        <button class="link-btn" id="footModeToggle" type="button">切换</button>
+      </div>
+    </div>
+    <nav class="foot-links">
+      <div>
+        <h4>产品</h4>
+        <a href="#features">特性</a>
+        <a href="#start">快速开始</a>
+        <a href="#pet">桌面宠物</a>
+        <a href="#roadmap">路线图</a>
+      </div>
+      <div>
+        <h4>资源</h4>
+        <a href="https://github.com/LK-BLOG/MollyPaw" target="_blank" rel="noopener">GitHub 仓库</a>
+        <a class="js-download is-disabled" href="#download" aria-disabled="true" data-dl="primary">下载最新版</a>
+        <a href="#download">国内加速下载</a>
+        <a href="#faq">常见问题</a>
+      </div>
+      <div>
+        <h4>关于</h4>
+        <a href="https://github.com/LK-BLOG/MollyPaw/blob/main/BRAND.md" target="_blank" rel="noopener">品牌指南</a>
+        <a href="https://github.com/LK-BLOG/MollyPaw/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">贡献指南</a>
+        <a href="https://github.com/LK-BLOG/MollyPaw/blob/main/LICENSE" target="_blank" rel="noopener">GPLv3 许可证</a>
+      </div>
+    </nav>
+  </div>
+  <div class="wrap foot-bottom">
+    <p>© 2026 MollyPaw · GPLv3 · 灵感来自摩尼，一只可乐色和白色的小泰迪犬。</p>
+    <p class="muted">Made with Python, without Rust.</p>
+  </div>
+</footer>
+
+<div class="mode-toast" id="modeToast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

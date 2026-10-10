@@ -1,0 +1,10 @@
+# 浏览器测试留下的 profile / 截图缓存
+preview/
+.shots-build/
+_*.html
+*.tmp
+
+# 系统垃圾
+Thumbs.db
+desktop.ini
+.DS_Store

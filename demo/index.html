@@ -1,0 +1,543 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MollyPaw</title>
+  <link rel="stylesheet" href="style.css">
+<style>
+/* --- 官网演示模式专用，不影响真实前端 --- */
+#demo-banner {
+  position: fixed; inset: 0 0 auto 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 34px; background: #6B4226; color: #FFF8F0;
+  font: 600 12.5px/1 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  letter-spacing: .02em;
+}
+#demo-banner b { color: #E8B37B; }
+#demo-banner .demo-cta {
+  background: #D4823A; color: #fff; text-decoration: none;
+  padding: 5px 12px; border-radius: 999px; font-weight: 700;
+}
+#demo-toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 14px);
+  background: #3A2A1A; color: #FFF8F0; padding: 10px 20px; border-radius: 999px;
+  font: 600 13px/1 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3); opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease; z-index: 9999; white-space: nowrap;
+}
+#demo-toast.show { opacity: 1; transform: translate(-50%, 0); }
+html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
+#send-btn { opacity: .55; cursor: not-allowed; }
+</style>
+
+<script>
+(function () {
+  var CONVS = [
+    { id: 'c1', title: '整理下载文件夹' },
+    { id: 'c2', title: '读一下这份合同的风险点' },
+    { id: 'c3', title: '把周报翻译成英文' },
+    { id: 'c4', title: '写个批量改文件名的脚本' },
+    { id: 'c5', title: '解释 PyWebView 工作原理' }
+  ];
+
+  var SCRIPT = {
+    c1: [
+      { role: 'user', content: '帮我把 D:\\Downloads 里的图片按月份分到子文件夹里' },
+      { role: 'assistant', content:
+        '好嘞～ 我先去翻一下那个文件夹里有什么 🐾\n\n' +
+        '**扫完了**，一共 **143 个图片文件**，从 2026-03 一直到 2026-09。\n\n' +
+        '我先把方案说给你听，你点头我再动手：\n\n' +
+        '- 按 `YYYY-MM` 建 7 个文件夹\n' +
+        '- 重名的自动加序号，**不覆盖你原来的文件**\n\n' +
+        '顺便，里面还混着 4 个不是图片的东西：`readme.txt`、`setup.exe`、`data.csv`、`note.md`。\n' +
+        '这几个我打算**碰都不碰**，可以吧？回个「好」我就开始 🐶' },
+      { role: 'user', content: '好，那几个留着。顺手把文件名里的空格换成下划线' },
+      { role: 'assistant', content:
+        '搞定啦～ **143 个文件全部搬完 + 改完名** 🐾\n\n' +
+        '空格都换成下划线了，中文名一个没动：\n\n' +
+        '> `IMG 2026 05 快递单.jpg` → `IMG_2026_05_快递单.jpg`\n\n' +
+        '原来长什么样我记在 `rename_log.json` 里了，**想撤销随时喊我**，一条命令的事～' },
+      { role: 'user', content: '那个 log 文件放哪了？' },
+      { role: 'assistant', content:
+        '就在 `D:\\Downloads\\rename_log.json`，跟图片放在一块儿了。\n\n' +
+        '我故意没往系统目录塞东西，省得你以后找不到 😄 要删的话说一声，我顺手清掉。' }
+    ],
+    c2: [
+      { role: 'user', content: '读一下 D:\\合同\\采购协议.pdf，告诉我对我不利的条款' },
+      { role: 'assistant', content:
+        '看完啦，一共 12 页 🐾 我挑出 **3 处你得留个心眼**的地方：\n\n' +
+        '**① 第 4.2 条 · 付款节奏**\n预付款 60%，交付后 30 天内付清。这年头常见的是 30/70，这条对你现金流不太友好。\n\n' +
+        '**② 第 7.1 条 · 违约金**\n只约了供方违约怎么办，**没写你违约怎么办** —— 单向的，不太对等。\n\n' +
+        '**③ 第 9.3 条 · 争议管辖**\n写的是对方所在地法院。万一真闹起来，你得出差打官司。\n\n' +
+        '⚠️ 顺便说一句：我只是帮你读文件，**不是律师**，真要签还是找专业的人过一眼。\n\n' +
+        '要我把这 3 条整理成一份修改建议的 Word，放到 `D:\\合同\\` 里吗？' }
+    ],
+    c3: [
+      { role: 'user', content: '把 D:\\周报.md 翻译成英文，保持 markdown 格式' },
+      { role: 'assistant', content:
+        '翻好啦～ 写到 `D:\\周报_EN.md` 了 🐾\n\n' +
+        '标题层级、列表、代码块**全部原样保留**。专有名词按你之前定的规矩没翻：`MollyPaw`、`PyWebView`、`AgentCore`。\n\n' +
+        '对了，原文第 3 段少了个句号，我**没自作主张补**，保持跟原文一致。要补的话跟我说～' }
+    ],
+    c4: [
+      { role: 'user', content: '写个脚本，把文件夹里所有 .jpeg 改成 .jpg' },
+      { role: 'assistant', content:
+        '写好放 `D:\\rename_ext.py` 了 🐾\n\n' +
+        '**默认是预览模式**，不加 `--apply` 绝对不会真改文件，你放心跑：\n\n' +
+        '```python\nfor p in Path(root).rglob("*.jpeg"):\n    if p.with_suffix(".jpg").exists():\n        print("skip", p.name)   # 不覆盖已有的 .jpg\n        continue\n    print("rename", p.name)\n```\n\n' +
+        '先跑一遍预览，把输出贴给我看看，确认没问题再加 `--apply` 真改～' }
+    ],
+    c5: [
+      { role: 'user', content: '解释一下 PyWebView 到底怎么工作的' },
+      { role: 'assistant', content:
+        '核心就一句：它**不打包浏览器**，直接借系统自带的 Web 引擎开窗口 🐾\n\n' +
+        '**1. 窗口从哪来**\n' +
+        'PyWebView 自己不渲染页面，它只是个「遥控器」：调系统 API 开一个原生窗口，' +
+        '里面塞一个系统 Web 控件。Windows 上是 **WebView2**（Edge 内核，Win10/11 自带）。\n\n' +
+        '**2. Python 和页面怎么说话**\n' +
+        '页面和 Python 是两个进程之外的东西，得有个通道。常见走法是搞一个本地 HTTP 服务，' +
+        '前端用 `fetch` 打 `/api/*`，Python 那头收到就干活。\n\n' +
+        '**3. 为什么不用 `js_api`**\n' +
+        'PyWebView 自带 `window.pywebview.api` 那套桥接，但它**会卡死 UI** —— ' +
+        '窗口线程和 Python 调用互相等，一旦同步调用就锁住。所以改用 HTTP + 轮询：\n' +
+        '先返回 `pending`，真结果丢进队列，前端从 `GET /api/events` 定时取。\n\n' +
+        '代价是有一点延迟（轮询间隔），换来的是界面永远不卡。' }
+    ]
+  };
+
+  var realFetch = window.fetch ? window.fetch.bind(window) : null;
+  var queue = [];   // 模拟真实后端的 pending→event 机制
+
+  function push(name, payload) {
+    queue.push({ name: name, payload: payload });
+  }
+
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (url.indexOf('127.0.0.1:18765') === -1) {
+      return realFetch ? realFetch(input, init) : Promise.reject(new Error('blocked'));
+    }
+    var path = url.replace(/^https?:\/\/127\.0\.0\.1:18765/, '');
+    var payload = { ok: true };
+    var body = {};
+    try { body = JSON.parse((init && init.body) || '{}'); } catch (e) {}
+
+    if (path.indexOf('/api/events') === 0) {
+      // 把攒下的事件一次性交给前端（真实后端就是这么干的）
+      payload = { ok: true, events: queue.splice(0, queue.length) };
+    } else if (path.indexOf('/api/conversations/load') === 0) {
+      var id = body.id || 'c1';
+      push('_onLoadConversationResult', {
+        ok: true,
+        conversation: { id: id, title: id, messages: SCRIPT[id] || SCRIPT.c1 }
+      });
+      payload = { ok: true, pending: true };
+    } else if (path.indexOf('/api/conversations/delete') === 0) {
+      var did = body.id;
+      CONVS = CONVS.filter(function (c) { return c.id !== did; });
+      push('_onConversationsResult', { ok: true, conversations: CONVS });
+      payload = { ok: true, pending: true };
+    } else if (path.indexOf('/api/conversations/new') === 0) {
+      var nid = 'n' + (CONVS.length + 1);
+      CONVS.unshift({ id: nid, title: '\u65b0\u5bf9\u8bdd' });
+      push('_onConversationsResult', { ok: true, conversations: CONVS });
+      push('_onNewConversationResult', { ok: true, id: nid });
+      payload = { ok: true, pending: true };
+    } else if (path.indexOf('/api/conversations') === 0) {
+      payload = { ok: true, conversations: CONVS };
+    } else if (path.indexOf('/api/balance') === 0) {
+      payload = { ok: true, supported: true, currency: 'CNY', balance: 12.83,
+                  balances: [{ currency: 'CNY', balance: 12.83 }, { currency: 'USD', balance: 1.76 }] };
+    } else if (path.indexOf('/api/models') === 0) {
+      payload = { ok: true, models: ['deepseek-flash'] };
+    } else if (path.indexOf('/api/providers') === 0) {
+      payload = { ok: true, providers: [
+        { id: 'deepseek', display_name: 'DeepSeek', base_url: 'https://api.deepseek.com/v1', protocol: 'chat' },
+        { id: 'kimi', display_name: 'Kimi / Moonshot', base_url: 'https://api.moonshot.cn/v1', protocol: 'chat' },
+        { id: 'qwen', display_name: 'Qwen / DashScope', base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1', protocol: 'chat' },
+        { id: 'custom', display_name: 'Custom', base_url: '', protocol: 'chat' }
+      ] };
+    } else if (path.indexOf('/api/sleep') === 0) {
+      payload = { ok: true, settings: { mode: 'off', tasks: ['memory', 'review', 'dream'], max_llm_calls: 100 } };
+    } else if (path.indexOf('/api/config') === 0) {
+      payload = { ok: true, config: {
+        provider_id: 'deepseek', model: 'deepseek-flash', base_url: 'https://api.deepseek.com/v1',
+        protocol: 'chat', approval_mode: 'full_access', language: 'zh',
+        temperature: 0.7, max_tokens: 2048, api_key: 'sk-demo-not-a-real-key'
+      } };
+    } else if (path.indexOf('/api/chat') === 0) {
+      // 演示模式绝不真的发消息，也不回任何内容
+      payload = { ok: true, pending: true };
+    } else {
+      payload = { ok: true, demo: true };
+    }
+
+    return Promise.resolve({
+      ok: true, status: 200,
+      json: function () { return Promise.resolve(payload); },
+      text: function () { return Promise.resolve(JSON.stringify(payload)); }
+    });
+  };
+
+  window.__DEMO__ = { convs: CONVS, script: SCRIPT };
+})();
+</script>
+
+</head>
+<body>
+  <!-- sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <svg role="img" aria-label="MollyPaw logo" class="logo-img" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="125" rx="38" ry="32" fill="#8B5E3C"/><ellipse cx="65" cy="75" rx="16" ry="18" fill="#A06E46"/><ellipse cx="100" cy="60" rx="16" ry="18" fill="#A06E46"/><ellipse cx="135" cy="75" rx="16" ry="18" fill="#A06E46"/></svg>
+        <span class="logo-text">MollyPaw</span>
+      </div>
+      <div class="sidebar-actions">
+        <button id="lang-toggle" class="icon-btn lang-btn" title="Switch Language">EN</button>
+        <button id="new-chat-btn" class="icon-btn" data-i18n="new_chat" data-i18n-attr="title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="sidebar-content">
+      <div class="chat-history" id="chat-history">
+        <div class="history-empty" data-i18n="no_conversations">No conversations yet</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button id="settings-btn" class="sidebar-action-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span data-i18n="settings">Settings</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- main chat area -->
+  <main id="main">
+    <div class="chat-container" id="chat-container">
+      <!-- welcome -->
+      <div class="welcome-screen" id="welcome-screen">
+        <svg role="img" aria-label="MollyPaw logo" class="welcome-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="125" rx="38" ry="32" fill="#8B5E3C"/><ellipse cx="65" cy="75" rx="16" ry="18" fill="#A06E46"/><ellipse cx="100" cy="60" rx="16" ry="18" fill="#A06E46"/><ellipse cx="135" cy="75" rx="16" ry="18" fill="#A06E46"/></svg>
+        <h1 data-i18n="welcome_title">Hello, I'm MollyPaw!</h1>
+        <p class="welcome-sub" data-i18n="welcome_sub">Your AI, right at your paw.</p>
+        <div class="welcome-prompts">
+          <button class="prompt-chip" data-prompt="Help me write a Python script to sort files by extension" data-i18n-prompt="chip_prompt1">
+            <span class="prompt-icon">&#128221;</span>
+            <span data-i18n="chip1">Write a Python script</span>
+          </button>
+          <button class="prompt-chip" data-prompt="Explain how PyWebView works under the hood" data-i18n-prompt="chip_prompt2">
+            <span class="prompt-icon">&#128161;</span>
+            <span data-i18n="chip2">Explain PyWebView</span>
+          </button>
+          <button class="prompt-chip" data-prompt="What can you do as an AI agent?" data-i18n-prompt="chip_prompt3">
+            <span class="prompt-icon">&#129302;</span>
+            <span data-i18n="chip3">What can you do?</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- messages -->
+      <div class="messages" id="messages"></div>
+    </div>
+
+    <!-- input area -->
+    <div class="input-area">
+      <div class="composer">
+        <div class="input-wrapper">
+          <textarea id="user-input" data-i18n="input_placeholder" data-i18n-attr="placeholder" placeholder="Ask MollyPaw anything..." rows="1"></textarea>
+          <button id="send-btn" class="send-btn" disabled data-i18n="send">发送</button>
+        </div>
+        <div class="input-status">
+          <div class="status-left">
+            <div class="approval-anchor">
+              <button id="approval-btn" class="status-btn approval-trigger" type="button">
+                <span class="approval-trigger-icon" data-mode-icon="prompt_all"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" d="M12.6683 4.16699C12.6683 3.84391 12.4065 3.58203 12.0834 3.58203C11.7603 3.58203 11.4984 3.84391 11.4984 4.16699V7.91699L11.4847 8.05078C11.4227 8.35375 11.1547 8.58203 10.8334 8.58203C10.4662 8.58203 10.1685 8.28411 10.1683 7.91699V3.75C10.1683 3.42691 9.90646 3.16504 9.58337 3.16504C9.26029 3.16504 8.99841 3.42691 8.99841 3.75V7.91699C8.99824 8.28411 8.70053 8.58203 8.33337 8.58203C7.96621 8.58203 7.66851 8.28411 7.66833 7.91699V5C7.66833 4.67691 7.40646 4.41504 7.08337 4.41504C6.76029 4.41504 6.49841 4.67691 6.49841 5V9.30371C6.53326 9.3429 6.56715 9.38359 6.59998 9.42578L8.02478 11.2588C8.25005 11.5486 8.19821 11.9659 7.90857 12.1914C7.6187 12.4169 7.20048 12.365 6.97498 12.0752L5.55017 10.2432C5.15812 9.7391 4.41813 9.73637 4.01501 10.1924C4.04396 10.426 4.11486 10.8323 4.25525 11.3486C4.44664 12.0525 4.75404 12.9113 5.21619 13.7383C6.14103 15.3931 7.62465 16.835 10.0004 16.835C12.8545 16.8348 15.1682 14.5211 15.1683 11.667V6.25C15.1683 5.92691 14.9065 5.66504 14.5834 5.66504C14.2603 5.66504 13.9984 5.92691 13.9984 6.25V9.16699C13.9982 9.53411 13.7005 9.83203 13.3334 9.83203C12.9662 9.83203 12.6685 9.53411 12.6683 9.16699V4.16699ZM13.9984 4.42578C14.1828 4.36671 14.3794 4.33496 14.5834 4.33496C15.641 4.33496 16.4984 5.19237 16.4984 6.25V11.667C16.4982 15.2557 13.589 18.1649 10.0004 18.165C6.95953 18.165 5.10939 16.2734 4.05505 14.3867C3.52774 13.4431 3.1843 12.4787 2.97205 11.6982C2.76447 10.9349 2.66834 10.2954 2.66833 10C2.66833 9.87959 2.70117 9.76148 2.76306 9.6582C3.28988 8.78018 4.26555 8.40372 5.16833 8.56152V5C5.16833 3.94237 6.02575 3.08496 7.08337 3.08496C7.31706 3.08496 7.54039 3.12845 7.74744 3.20508C7.98218 2.41297 8.7151 1.83496 9.58337 1.83496C10.1836 1.83496 10.7186 2.11176 11.0697 2.54395C11.3639 2.35978 11.7107 2.25195 12.0834 2.25195C13.141 2.25195 13.9984 3.10937 13.9984 4.16699V4.42578Z"/></svg></span>
+                <span class="approval-trigger-icon" data-mode-icon="prompt_dangerous"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M9.06543 1.95123C9.66107 1.69076 10.3389 1.69071 10.9346 1.95123L15.9346 4.13873C16.7832 4.51008 17.3311 5.34917 17.3311 6.27545V10.5528C17.3309 14.6017 14.0489 17.8847 10 17.8848C5.95108 17.8846 2.66813 14.6017 2.66797 10.5528V6.27545C2.66797 5.34924 3.21695 4.51012 4.06543 4.13873L9.06543 1.95123ZM10.4014 3.16998C10.1456 3.05814 9.85444 3.05819 9.59863 3.16998L4.59863 5.35748C4.23427 5.51708 3.99805 5.87764 3.99805 6.27545V10.5528C3.99821 13.8671 6.68563 16.5546 10 16.5547C13.3144 16.5546 16.0008 13.8671 16.001 10.5528V6.27545C16.001 5.87756 15.7658 5.51703 15.4014 5.35748L10.4014 3.16998Z"/><path fill="currentColor" d="M13.4678 11.4318L13.333 11.4182H10.833C10.466 11.4183 10.1682 11.7162 10.168 12.0832C10.168 12.4504 10.4659 12.7481 10.833 12.7482H13.333L13.4678 12.7346C13.7706 12.6724 13.9981 12.4044 13.9981 12.0832C13.9979 11.7621 13.7706 11.494 13.4678 11.4318Z"/><path fill="currentColor" d="M7.65336 12.426C7.46431 12.7406 7.05607 12.8424 6.74125 12.6535C6.42646 12.4646 6.32395 12.0563 6.51274 11.7414L7.55668 10.0002L6.51274 8.25899C6.32395 7.94412 6.42646 7.53583 6.74125 7.34688C7.05607 7.15799 7.46431 7.25975 7.65336 7.57442L8.90336 9.6584C9.0296 9.86893 9.0296 10.1315 8.90336 10.342L7.65336 12.426Z"/></svg></span>
+                <span class="approval-trigger-icon active" data-mode-icon="full_access"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M9.06543 1.95123C9.66107 1.69076 10.3389 1.69071 10.9346 1.95123L15.9346 4.13873C16.7832 4.51008 17.3311 5.34917 17.3311 6.27545V10.5528C17.3309 14.6017 14.0489 17.8847 10 17.8848C5.95108 17.8846 2.66813 14.6017 2.66797 10.5528V6.27545C2.66797 5.34924 3.21695 4.51012 4.06543 4.13873L9.06543 1.95123ZM10.4014 3.16998C10.1456 3.05814 9.85444 3.05819 9.59863 3.16998L4.59863 5.35748C4.23427 5.51708 3.99805 5.87764 3.99805 6.27545V10.5528C3.99821 13.8671 6.68563 16.5546 10 16.5547C13.3144 16.5546 16.0008 13.8671 16.001 10.5528V6.27545C16.001 5.87756 15.7658 5.51703 15.4014 5.35748L10.4014 3.16998Z"/><path fill="currentColor" d="M10.8883 13.1116C10.8883 13.6025 10.4903 14.0005 9.99936 14.0005C9.50844 14.0005 9.11047 13.6025 9.11047 13.1116C9.11047 12.6207 9.50844 12.2227 9.99936 12.2227C10.4903 12.2227 10.8883 12.6207 10.8883 13.1116Z"/><path fill="currentColor" d="M10.5169 10.8949L11.1135 7.31519C11.2283 6.62672 10.6974 6 9.99941 6C9.30145 6 8.77053 6.62672 8.88528 7.31519L9.4819 10.8949C9.52406 11.1479 9.74294 11.3333 9.99941 11.3333C10.2559 11.3333 10.4748 11.1479 10.5169 10.8949Z"/></svg></span>
+                <span id="approval-label">完全访问</span>
+              </button>
+              <div id="approval-menu" class="approval-menu" hidden>
+                <div class="approval-menu-head"><span class="approval-menu-title">应如何批准 MollyPaw 操作？</span><span class="approval-menu-learn">了解更多</span></div>
+                <button type="button" class="approval-option" data-approval-mode="prompt_all">
+                  <span class="approval-option-icon"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" d="M12.6683 4.16699C12.6683 3.84391 12.4065 3.58203 12.0834 3.58203C11.7603 3.58203 11.4984 3.84391 11.4984 4.16699V7.91699L11.4847 8.05078C11.4227 8.35375 11.1547 8.58203 10.8334 8.58203C10.4662 8.58203 10.1685 8.28411 10.1683 7.91699V3.75C10.1683 3.42691 9.90646 3.16504 9.58337 3.16504C9.26029 3.16504 8.99841 3.42691 8.99841 3.75V7.91699C8.99824 8.28411 8.70053 8.58203 8.33337 8.58203C7.96621 8.58203 7.66851 8.28411 7.66833 7.91699V5C7.66833 4.67691 7.40646 4.41504 7.08337 4.41504C6.76029 4.41504 6.49841 4.67691 6.49841 5V9.30371C6.53326 9.3429 6.56715 9.38359 6.59998 9.42578L8.02478 11.2588C8.25005 11.5486 8.19821 11.9659 7.90857 12.1914C7.6187 12.4169 7.20048 12.365 6.97498 12.0752L5.55017 10.2432C5.15812 9.7391 4.41813 9.73637 4.01501 10.1924C4.04396 10.426 4.11486 10.8323 4.25525 11.3486C4.44664 12.0525 4.75404 12.9113 5.21619 13.7383C6.14103 15.3931 7.62465 16.835 10.0004 16.835C12.8545 16.8348 15.1682 14.5211 15.1683 11.667V6.25C15.1683 5.92691 14.9065 5.66504 14.5834 5.66504C14.2603 5.66504 13.9984 5.92691 13.9984 6.25V9.16699C13.9982 9.53411 13.7005 9.83203 13.3334 9.83203C12.9662 9.83203 12.6685 9.53411 12.6683 9.16699V4.16699ZM13.9984 4.42578C14.1828 4.36671 14.3794 4.33496 14.5834 4.33496C15.641 4.33496 16.4984 5.19237 16.4984 6.25V11.667C16.4982 15.2557 13.589 18.1649 10.0004 18.165C6.95953 18.165 5.10939 16.2734 4.05505 14.3867C3.52774 13.4431 3.1843 12.4787 2.97205 11.6982C2.76447 10.9349 2.66834 10.2954 2.66833 10C2.66833 9.87959 2.70117 9.76148 2.76306 9.6582C3.28988 8.78018 4.26555 8.40372 5.16833 8.56152V5C5.16833 3.94237 6.02575 3.08496 7.08337 3.08496C7.31706 3.08496 7.54039 3.12845 7.74744 3.20508C7.98218 2.41297 8.7151 1.83496 9.58337 1.83496C10.1836 1.83496 10.7186 2.11176 11.0697 2.54395C11.3639 2.35978 11.7107 2.25195 12.0834 2.25195C13.141 2.25195 13.9984 3.10937 13.9984 4.16699V4.42578Z"/></svg></span>
+                  <span class="approval-option-copy"><strong>请求批准</strong><small>编辑外部文件和使用互联网时始终询问</small></span>
+                  <span class="approval-option-check"><svg viewBox="0 0 17 17" fill="none" aria-hidden="true"><path fill="currentColor" d="M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z"/></svg></span>
+                </button>
+                <button type="button" class="approval-option" data-approval-mode="prompt_dangerous">
+                  <span class="approval-option-icon"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M9.06543 1.95123C9.66107 1.69076 10.3389 1.69071 10.9346 1.95123L15.9346 4.13873C16.7832 4.51008 17.3311 5.34917 17.3311 6.27545V10.5528C17.3309 14.6017 14.0489 17.8847 10 17.8848C5.95108 17.8846 2.66813 14.6017 2.66797 10.5528V6.27545C2.66797 5.34924 3.21695 4.51012 4.06543 4.13873L9.06543 1.95123ZM10.4014 3.16998C10.1456 3.05814 9.85444 3.05819 9.59863 3.16998L4.59863 5.35748C4.23427 5.51708 3.99805 5.87764 3.99805 6.27545V10.5528C3.99821 13.8671 6.68563 16.5546 10 16.5547C13.3144 16.5546 16.0008 13.8671 16.001 10.5528V6.27545C16.001 5.87756 15.7658 5.51703 15.4014 5.35748L10.4014 3.16998Z"/><path fill="currentColor" d="M13.4678 11.4318L13.333 11.4182H10.833C10.466 11.4183 10.1682 11.7162 10.168 12.0832C10.168 12.4504 10.4659 12.7481 10.833 12.7482H13.333L13.4678 12.7346C13.7706 12.6724 13.9981 12.4044 13.9981 12.0832C13.9979 11.7621 13.7706 11.494 13.4678 11.4318Z"/><path fill="currentColor" d="M7.65336 12.426C7.46431 12.7406 7.05607 12.8424 6.74125 12.6535C6.42646 12.4646 6.32395 12.0563 6.51274 11.7414L7.55668 10.0002L6.51274 8.25899C6.32395 7.94412 6.42646 7.53583 6.74125 7.34688C7.05607 7.15799 7.46431 7.25975 7.65336 7.57442L8.90336 9.6584C9.0296 9.86893 9.0296 10.1315 8.90336 10.342L7.65336 12.426Z"/></svg></span>
+                  <span class="approval-option-copy"><strong>帮我批准</strong><small>仅对检测到的风险操作请求批准</small></span>
+                  <span class="approval-option-check"><svg viewBox="0 0 17 17" fill="none" aria-hidden="true"><path fill="currentColor" d="M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z"/></svg></span>
+                </button>
+                <button type="button" class="approval-option" data-approval-mode="full_access">
+                  <span class="approval-option-icon"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M9.06543 1.95123C9.66107 1.69076 10.3389 1.69071 10.9346 1.95123L15.9346 4.13873C16.7832 4.51008 17.3311 5.34917 17.3311 6.27545V10.5528C17.3309 14.6017 14.0489 17.8847 10 17.8848C5.95108 17.8846 2.66813 14.6017 2.66797 10.5528V6.27545C2.66797 5.34924 3.21695 4.51012 4.06543 4.13873L9.06543 1.95123ZM10.4014 3.16998C10.1456 3.05814 9.85444 3.05819 9.59863 3.16998L4.59863 5.35748C4.23427 5.51708 3.99805 5.87764 3.99805 6.27545V10.5528C3.99821 13.8671 6.68563 16.5546 10 16.5547C13.3144 16.5546 16.0008 13.8671 16.001 10.5528V6.27545C16.001 5.87756 15.7658 5.51703 15.4014 5.35748L10.4014 3.16998Z"/><path fill="currentColor" d="M10.8883 13.1116C10.8883 13.6025 10.4903 14.0005 9.99936 14.0005C9.50844 14.0005 9.11047 13.6025 9.11047 13.1116C9.11047 12.6207 9.50844 12.2227 9.99936 12.2227C10.4903 12.2227 10.8883 12.6207 10.8883 13.1116Z"/><path fill="currentColor" d="M10.5169 10.8949L11.1135 7.31519C11.2283 6.62672 10.6974 6 9.99941 6C9.30145 6 8.77053 6.62672 8.88528 7.31519L9.4819 10.8949C9.52406 11.1479 9.74294 11.3333 9.99941 11.3333C10.2559 11.3333 10.4748 11.1479 10.5169 10.8949Z"/></svg></span>
+                  <span class="approval-option-copy"><strong>完全访问权限</strong><small>可不受限制地访问互联网和你电脑上的任何文件</small></span>
+                  <span class="approval-option-check"><svg viewBox="0 0 17 17" fill="none" aria-hidden="true"><path fill="currentColor" d="M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z"/></svg></span>
+                </button>
+              </div>
+            </div>
+            <span id="balance-status">余额暂不可用</span>
+          </div>
+          <div class="status-right">
+            <button id="model-menu-btn" class="status-btn model-menu-btn" type="button">模型</button>
+            <div id="thinking-menu" class="thinking-menu" hidden>
+              <div id="thinking-current" class="thinking-current">无</div>
+              <div id="thinking-model" class="thinking-model">模型</div>
+              <div class="thinking-slider-wrap">
+                <div class="thinking-slider-track" aria-hidden="true"><div id="thinking-thumb" class="thinking-thumb"></div></div>
+                <input id="thinking-slider" class="thinking-slider" type="range" min="0" max="4" step="1" value="0" aria-label="思考深度">
+                <div class="thinking-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="input-hint" data-i18n="hint">MollyPaw Beta 0.0.0.1.5</p>
+    </div>
+  </main>
+
+  <!-- settings panel -->
+  <div class="modal-overlay" id="settings-modal" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 data-i18n="settings_title">Settings</h2>
+        <button id="settings-close" class="icon-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-tabs">
+          <button type="button" class="settings-tab active" data-settings-tab="model">模型</button>
+          <button type="button" class="settings-tab" data-settings-tab="permissions">权限</button>
+          <button type="button" class="settings-tab" data-settings-tab="sleep">睡眠</button>
+        </div>
+        <div class="settings-tab-panel active" data-settings-panel="model">
+        <div class="form-group">
+          <label for="cfg-provider" data-i18n="provider_label">Provider</label>
+          <select id="cfg-provider"></select>
+        </div>
+        <div class="form-group">
+          <label for="cfg-api-key" data-i18n="api_key_label">API Key</label>
+          <input type="password" id="cfg-api-key" placeholder="sk-...">
+        </div>
+        <div class="form-group" id="cfg-custom-url-group" style="display:none;">
+          <label for="cfg-base-url" data-i18n="base_url_label">Base URL</label>
+          <input type="text" id="cfg-base-url" placeholder="https://api.example.com/v1">
+        </div>
+        <div class="form-group" id="cfg-balance-path-group" style="display:none;">
+          <label for="cfg-balance-path">余额接口路径</label>
+          <input type="text" id="cfg-balance-path" placeholder="/user/balance">
+        </div>
+        <div class="form-group" id="cfg-protocol-group" style="display:none;">
+          <label for="cfg-protocol" data-i18n="protocol_label">API Protocol</label>
+          <select id="cfg-protocol">
+            <option value="chat" data-i18n="protocol_chat">OpenAI Chat Completions</option>
+            <option value="responses" data-i18n="protocol_responses">OpenAI Responses</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cfg-model" data-i18n="model_label">Model</label>
+          <div class="model-row">
+            <select id="cfg-model" disabled></select>
+            <button id="cfg-fetch-models" class="btn-secondary" type="button" data-i18n="fetch_models">拉取模型</button>
+          </div>
+          <input type="text" id="cfg-manual-model" class="manual-model" style="display:none;" placeholder="model-id">
+        </div>
+        <div class="form-group">
+          <label for="cfg-context-window">上下文窗口</label>
+          <div class="model-row context-row">
+            <input type="number" id="cfg-context-window" min="0.01" step="any" placeholder="1">
+            <select id="cfg-context-unit">
+              <option value="K">K tokens</option>
+              <option value="M">M tokens</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cfg-max-tool-rounds">最大工具轮次</label>
+          <input type="number" id="cfg-max-tool-rounds" min="1" max="1000" step="1" placeholder="100">
+        </div>
+        <div class="form-group">
+          <label for="cfg-max-tokens">最大输出 tokens</label>
+          <input type="number" id="cfg-max-tokens" min="256" step="1024" placeholder="32768">
+        </div>
+        <div class="form-group">
+          <label for="cfg-temperature" data-i18n="temp_label">Temperature</label>
+          <input type="number" id="cfg-temperature" min="0" max="2" step="0.1" placeholder="0.7">
+        </div>
+        </div>
+        <div class="settings-tab-panel" data-settings-panel="permissions">
+        <div class="form-group">
+          <label for="cfg-approval-mode" data-i18n="approval_mode_label">Tool Approval Mode</label>
+          <select id="cfg-approval-mode">
+            <option value="prompt_all" data-i18n="approval_all">Prompt for all tools</option>
+            <option value="prompt_dangerous" selected data-i18n="approval_dangerous">Prompt dangerous only</option>
+            <option value="full_access" data-i18n="approval_full">Full access (no prompts)</option>
+          </select>
+        </div>
+        </div>
+        <div class="settings-tab-panel" data-settings-panel="sleep">
+        <div class="sleep-section">
+          <div class="sleep-section-head">
+            <span>睡眠整理</span>
+            <small id="sleep-status-text"></small>
+          </div>
+          <div class="form-group">
+            <label for="cfg-sleep-mode">睡眠模式</label>
+            <select id="cfg-sleep-mode">
+              <option value="off">关闭</option>
+              <option value="display_only">只显示</option>
+              <option value="full">完整</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cfg-sleep-max-calls">单任务最大 LLM 调用</label>
+            <input type="number" id="cfg-sleep-max-calls" min="1" max="500" step="1" value="100">
+          </div>
+          <div class="form-group">
+            <label>整理任务</label>
+            <div id="sleep-task-group" class="sleep-task-group">
+              <label><input type="checkbox" value="memory"> 整理记忆</label>
+              <label><input type="checkbox" value="review"> 梳理对话</label>
+              <label><input type="checkbox" value="dream"> 写梦</label>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="form-actions">
+          <button id="cfg-save" class="btn-primary" data-i18n="save">Save</button>
+          <button id="cfg-cancel" class="btn-secondary" data-i18n="cancel">Cancel</button>
+        </div>
+        <div id="cfg-status" class="cfg-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Modal -->
+  <div class="approval-overlay" id="approval-overlay" style="display:none;">
+    <div class="approval-modal">
+      <div class="approval-header">
+        <span class="approval-icon">&#9888;&#65039;</span>
+        <h3 data-i18n="approval_title">Approval Required</h3>
+      </div>
+      <div class="approval-body">
+        <div class="approval-detail">
+          <span class="approval-label" data-i18n="approval_tool">Tool</span>
+          <span id="approval-tool-name"></span>
+        </div>
+        <div class="approval-detail">
+          <span class="approval-label" data-i18n="approval_args">Arguments</span>
+          <pre id="approval-args"></pre>
+        </div>
+        <div class="approval-detail">
+          <span class="approval-label" data-i18n="approval_danger">Danger Level</span>
+          <span id="approval-danger" class="danger-badge">dangerous</span>
+        </div>
+      </div>
+      <div class="approval-actions">
+        <button id="approval-approve" class="btn-approve" data-i18n="approval_approve">Approve</button>
+        <button id="approval-reject" class="btn-reject" data-i18n="approval_reject">Reject</button>
+        <label class="approval-always">
+          <input type="checkbox" id="approval-always-check"> <span data-i18n="approval_always">Always approve in this session</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <script src="marked.min.js"></script>
+  <script src="app.js"></script>
+
+
+<div id="demo-banner">
+  <span>🧪 <b>在线演示</b> · 假数据，随便点，发不出消息</span>
+  <a class="demo-cta" href="../index.html#download" target="_top">下载真货</a>
+</div>
+<div id="demo-toast"></div>
+
+<script>
+(function () {
+  // 嵌在 iframe 里时，焦点被抢会把父页面滚走 —— 演示页直接禁掉自动 focus
+  var EMBEDDED = (function () { try { return window.self !== window.top; } catch (e) { return true; } })();
+  if (EMBEDDED) {
+    var realFocus = HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus = function () {
+      // 只有用户主动点进来时才允许聚焦，避免页面自己抢焦点
+      if (document.__userInteracted) return realFocus.apply(this, arguments);
+    };
+    document.addEventListener('mousedown', function () { document.__userInteracted = true; }, true);
+    document.addEventListener('touchstart', function () { document.__userInteracted = true; }, true);
+  }
+
+  var toastEl = document.getElementById('demo-toast');
+  var toastTimer = null;
+  function toast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+  window.__demoToast = toast;
+
+  // 1) 拦住发送按钮（捕获阶段，抢在 app.js 之前）
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('#send-btn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    toast('\u6f14\u793a\u6a21\u5f0f\u53d1\u4e0d\u51fa\u6d88\u606f \u2014\u2014 \u4e0b\u8f7d\u540e\u63a5\u4f60\u81ea\u5df1\u7684\u6a21\u578b\u5c31\u80fd\u804a\u4e86');
+  }, true);
+
+  // 2) 拦住回车发送
+  document.addEventListener('keydown', function (e) {
+    var ta = e.target;
+    if (!ta || ta.id !== 'user-input') return;
+    if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    toast('\u6f14\u793a\u6a21\u5f0f\u53d1\u4e0d\u51fa\u6d88\u606f \u2014\u2014 \u4e0b\u8f7d\u540e\u63a5\u4f60\u81ea\u5df1\u7684\u6a21\u578b\u5c31\u80fd\u804a\u4e86');
+  }, true);
+
+  // 3) 兜底：任何指向 /api/chat 的请求直接掐断
+  var realFetch = window.fetch;
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if (url.indexOf('/api/chat') !== -1) {
+      toast('\u6f14\u793a\u6a21\u5f0f\u53d1\u4e0d\u51fa\u6d88\u606f');
+      return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ ok: true, pending: true }); } });
+    }
+    return realFetch.apply(this, arguments);
+  };
+
+  // 4) 渲染假对话 + 预置用量
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var api = window.__DEMO__;
+      if (!api) return;
+      if (window._onConversationsResult) window._onConversationsResult({ ok: true, conversations: api.convs });
+      if (window._onBalanceResult) window._onBalanceResult({ ok: true, supported: true, currency: 'CNY', balance: 12.83,
+        balances: [{ currency: 'CNY', balance: 12.83 }, { currency: 'USD', balance: 1.76 }] });
+      if (window._onConfigResult) window._onConfigResult({ ok: true, config: {
+        provider_id: 'deepseek', model: 'deepseek-flash', base_url: 'https://api.deepseek.com/v1',
+        protocol: 'chat', approval_mode: 'full_access', language: 'zh', temperature: 0.7, max_tokens: 2048
+      } });
+      if (window._onModelsResult) window._onModelsResult({ ok: true, models: ['deepseek-flash'] });
+      if (window._onLoadConversationResult) {
+        window._onLoadConversationResult({ ok: true, conversation: { id: 'c1', messages: api.script.c1 } });
+      }
+      var first = document.querySelector('.history-item');
+      if (first) first.classList.add('active');
+      var box = document.querySelector('.messages');
+      if (box) box.classList.add('has-messages');
+      var ta = document.getElementById('user-input');
+      if (ta && !ta.value) ta.placeholder = '\u6f14\u793a\u6a21\u5f0f\uff1a\u80fd\u6253\u5b57\uff0c\u53d1\u4e0d\u51fa\u53bb';
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>

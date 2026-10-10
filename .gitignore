@@ -1,8 +1,12 @@
 # 浏览器测试留下的 profile / 截图缓存
 preview/
 .shots-build/
+_live/
 _*.html
 *.tmp
+
+# wrangler 本地缓存（含账号信息，别提交）
+.wrangler/
 
 # 系统垃圾
 Thumbs.db

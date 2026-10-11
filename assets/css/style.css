@@ -176,10 +176,19 @@ html[data-mode="dev"] .cta-band {
   border-top-color: var(--line);
 }
 html[data-mode="dev"] .foot { background: #150E0A; }
+/* 页脚本身已是固定深色，暗色下只需把文字固定成浅色，
+   别用 var(--brown-300) 之类会被主题反转的变量 */
+html[data-mode="dev"] .foot,
+html[data-mode="dev"] .foot-brand .brand,
+html[data-mode="dev"] .foot-brand .brand-text { color: #FFF8F0; }
 html[data-mode="dev"] .foot-brand .brand em,
+html[data-mode="dev"] .foot-brand .brand-paw,
+html[data-mode="dev"] .foot-links h4,
 html[data-mode="dev"] .foot-mode strong,
-html[data-mode="dev"] .link-btn,
-html[data-mode="dev"] .foot-brand .brand-paw { color: var(--brown-300); }
+html[data-mode="dev"] .link-btn { color: #D2B48C; }
+html[data-mode="dev"] .foot-links a { color: rgba(255, 248, 240, .82); }
+html[data-mode="dev"] .foot-links a:hover,
+html[data-mode="dev"] .link-btn:hover { color: #FFFFFF; }
 html[data-mode="dev"] .mode-toast { background: #3A2818; color: var(--text); }
 html[data-mode="dev"] .code-card { border-color: rgba(210, 180, 140, .18); }
 html[data-mode="dev"] .faq summary::after,
@@ -244,6 +253,39 @@ html[data-mode="dev"] .ms-thumb { transform: translateX(100%); }
   padding: 14px 16px; margin: 16px 0 20px; font-size: 14.5px; color: var(--brown-700);
 }
 .btn-block { width: 100%; }
+/* 小白版的引导步骤：短、能照做 */
+.tip-lead { margin-bottom: 10px; }
+.mini-steps { margin: 10px 0 4px; padding-left: 20px; }
+.mini-steps li { margin-bottom: 12px; line-height: 1.7; }
+.addr {
+  display: inline-block; background: var(--brown-100); color: var(--brown-700);
+  padding: 3px 10px; border-radius: 6px; font-weight: 700;
+  font-size: 14.5px; user-select: all; margin: 4px 6px 4px 0;
+}
+.copy-inline {
+  display: inline-block; vertical-align: middle;
+  background: var(--orange); color: #fff; font-weight: 800;
+  font-size: 12.5px; padding: 4px 12px; border-radius: 999px;
+  transition: background .2s var(--ease);
+}
+.copy-inline:hover { background: var(--orange-600); }
+.copy-inline.ok { background: var(--brown-700); }
+.warn-list { margin: 8px 0 0; padding-left: 20px; }
+.warn-list li { margin-bottom: 6px; line-height: 1.65; }
+.plain-warn {
+  background: var(--white); border: 1px solid var(--brown-300);
+  border-left: 4px solid var(--brown-600);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  padding: 14px 16px; margin: 16px 0 18px;
+  font-size: 14.5px; color: var(--brown-700);
+}
+html[data-mode="dev"] .plain-warn { background: #2B1E15; border-color: var(--line-strong); color: var(--text); }
+.lede-2 { margin-top: 12px; }
+.inline-help {
+  color: var(--orange-600); font-weight: 800; text-decoration: underline;
+  text-underline-offset: 3px; text-decoration-thickness: 2px;
+}
+.inline-help:hover { color: var(--orange); }
 .road-item.todo::before { background: var(--brown-300); }
 .road-item.todo .road-badge { background: var(--brown-100); color: var(--brown-500); }
 
@@ -470,6 +512,8 @@ code { font-family: var(--mono); font-size: .9em; }
   transition: background .2s var(--ease), color .2s var(--ease);
 }
 .nav-links a:hover { background: var(--brown-100); color: var(--brown-700); }
+/* 模式切换在桌面端由顶栏 switch 负责，这行只在手机菜单里出现 */
+.nav-mode-entry { display: none; }
 .nav-actions { display: flex; align-items: center; gap: 10px; margin-left: 8px; }
 
 .nav-toggle { display: none; flex-direction: column; gap: 5px; padding: 10px; border-radius: 8px; }
@@ -775,17 +819,20 @@ code { font-family: var(--mono); font-size: .9em; }
 .cta-band p { margin-top: 12px; font-size: 17.5px; color: var(--brown-600); }
 .cta-band .hero-cta { justify-content: center; }
 
-/* ---------- Footer ---------- */
-.foot { background: var(--brown-700); color: var(--cream); padding: 62px 0 26px; }
+/* ---------- Footer ----------
+   页脚永远是深色区，所以这里用固定色值，不能用会随主题反转的变量。
+   （之前用 var(--cream) 当文字色，暗色模式下 --cream 变深色，
+     配上同样变深的背景 → 对比度 1.05，字等于隐形。） */
+.foot { background: #6B4226; color: #FFF8F0; padding: 62px 0 26px; }
 .foot-inner { display: grid; grid-template-columns: 1.2fr 2fr; gap: 48px; }
-.foot-brand .brand { color: var(--cream); font-size: 22px; }
-.foot-brand .brand-paw { color: var(--brown-300); }
-.foot-brand .brand em { color: var(--brown-300); }
+.foot-brand .brand { color: #FFF8F0; font-size: 22px; }
+.foot-brand .brand-paw { color: #D2B48C; }
+.foot-brand .brand em { color: #D2B48C; }
 .foot-brand p { margin-top: 14px; color: rgba(255, 248, 240, .72); font-size: 15px; }
 .foot-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
-.foot-links h4 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--brown-300); margin-bottom: 14px; }
+.foot-links h4 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #D2B48C; margin-bottom: 14px; }
 .foot-links a { display: block; padding: 5px 0; color: rgba(255, 248, 240, .82); font-size: 15px; transition: color .2s var(--ease), transform .2s var(--ease); }
-.foot-links a:hover { color: var(--white); transform: translateX(4px); }
+.foot-links a:hover { color: #FFFFFF; transform: translateX(4px); }
 .foot-bottom {
   margin-top: 46px; padding-top: 22px; border-top: 1px solid rgba(255, 248, 240, .16);
   display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between;
@@ -820,6 +867,11 @@ code { font-family: var(--mono); font-size: .9em; }
   }
   .nav-links.open { transform: none; opacity: 1; pointer-events: auto; }
   .nav-links a { padding: 12px 14px; font-size: 16px; }
+  .nav-mode-entry {
+    display: block; margin-top: 6px;
+    border-top: 1px solid var(--brown-200); padding-top: 14px !important;
+    color: var(--orange-600) !important; font-weight: 800;
+  }
   .nav-toggle { display: flex; }
   .mode-switch { display: none; }
   .mode-btn-mobile {
@@ -837,6 +889,25 @@ code { font-family: var(--mono); font-size: .9em; }
   .foot-inner { grid-template-columns: 1fr; gap: 34px; }
   .stage-badge-a { left: 0; }
   .stage-badge-b { right: 0; }
+}
+
+/* 小屏导航栏会挤爆（品牌 + 模式 + 下载 + 汉堡 撑过 386px），这里逐级收紧。
+   模式切换挪进菜单，不占顶栏。 */
+@media (max-width: 430px) {
+  .nav-actions .btn-primary { padding: 8px 14px; font-size: 13.5px; }
+  .mode-btn-mobile { padding: 7px 11px; font-size: 12.5px; }
+  .brand-text { font-size: 18px; }
+  .brand-paw { width: 26px; height: 26px; }
+  .nav-inner { gap: 12px; }
+}
+
+@media (max-width: 375px) {
+  .mode-btn-mobile { display: none; }
+  .nav-actions { gap: 6px; }
+  .brand-text { font-size: 17px; }
+  .nav-actions .btn-primary { padding: 8px 12px; font-size: 13px; }
+  .nav-toggle { padding: 8px; }
+  .wrap { padding: 0 14px; }
 }
 
 @media (max-width: 620px) {

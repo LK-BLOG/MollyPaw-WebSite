@@ -56,6 +56,7 @@
       <a href="#pet">宠物</a>
       <a href="#compare"><span class="only-lite">好在哪</span><span class="only-dev">对比</span></a>
       <a href="#faq">FAQ</a>
+      <a class="nav-mode-entry" href="#top" id="navModeEntry">切换：小白版 / 技术版</a>
     </nav>
 
     <div class="nav-actions">
@@ -97,10 +98,13 @@
         <!-- 小白版 -->
         <div class="only-lite">
           <p class="lede">
-            它是一个<strong>装在你电脑上</strong>的 AI 助手。
-            不用注册账号，不用打开浏览器登录。你想让它干嘛，打一行字就行 ——
-            整理文件、看文档、改代码，它<strong>真的会动手做</strong>。
-            旁边还有一只小泰迪陪着你。
+            它是一个<strong>装在你电脑上</strong>的 AI 助手，跟手机里的 AI 差不多，
+            但它是<strong>住在电脑里</strong>的 —— 你打字告诉它要干什么，
+            它会<strong>直接动手</strong>：把乱糟糟的文件夹归档、把 PDF 读一遍总结、把一堆照片改名。
+          </p>
+          <p class="lede lede-2">
+            不用注册账号，不用填任何看<a class="inline-help" href="#whatis">不懂的东西</a>，
+            下载下来双击就能开始。
           </p>
           <div class="hero-cta">
             <a class="btn btn-primary btn-lg js-download is-disabled" href="#download" aria-disabled="true" data-dl="primary">
@@ -109,9 +113,9 @@
             <a class="btn btn-outline btn-lg" href="#download">下载慢？换条线路</a>
           </div>
           <ul class="hero-meta">
-            <li><strong>免费</strong>，开源不锁功能</li>
+            <li><strong>免费</strong>，不是试用</li>
             <li>下载完<strong>双击就能用</strong></li>
-            <li>你的文件<strong>不出你电脑</strong></li>
+            <li>你的文件<strong>不会传出去</strong></li>
           </ul>
         </div>
 
@@ -203,21 +207,21 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg>
             </div>
             <h3>东西都在你自己电脑上</h3>
-            <p>聊天记录和文件都留在本地，不会偷偷传给别人。用本地模型的话，断网也能用。</p>
+            <p>聊天记录存在你本机，不会传给别人。只有你主动让它做的事，才会发给你填的那家 AI 公司。</p>
           </article>
           <article class="card reveal">
             <div class="card-ico">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9"/><path d="M14.6 9.8c-.5-.9-1.5-1.4-2.6-1.4-1.4 0-2.5.8-2.5 1.9 0 2.6 5.4 1.3 5.4 3.9 0 1.1-1.1 1.9-2.6 1.9-1.1 0-2.1-.5-2.6-1.4"/></svg>
             </div>
-            <h3>免费，是真免费</h3>
-            <p>代码全公开，没有会员，没有功能墙。你只需要付给模型提供方该付的钱；用本地模型就一分不花。</p>
+            <h3>程序免费，用多少付多少</h3>
+            <p>软件本身不收费，永久免费，不是试用版。日常聊天一个月几块钱，相当于一杯奶茶。</p>
           </article>
           <article class="card reveal">
             <div class="card-ico">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M17.5 3.5a2.1 2.1 0 0 1 3 3L12 15l-3 .7.7-3z"/></svg>
             </div>
-            <h3>想换谁家的「脑子」都行</h3>
-            <p>今天用这家，明天换那家，界面完全不变。填个地址和钥匙就切过去了，不重装。</p>
+            <h3>想换谁家的 AI 都行</h3>
+            <p>今天用这家，明天换那家，界面完全不变。设置里点两下就切过去了，不用重装。</p>
           </article>
         </div>
       </div>
@@ -296,32 +300,87 @@
               <span class="step-num">1</span>
               <div>
                 <h3>下载</h3>
-                <p>去 Release 页面下 <code>MollyPaw.exe</code>，放到桌面就行，不用安装。</p>
+                <p>点上面的橙色按钮，会下一个叫 <code>MollyPaw.exe</code> 的文件。<strong>放到桌面</strong>就行，不用安装。</p>
               </div>
             </li>
             <li class="reveal">
               <span class="step-num">2</span>
               <div>
-                <h3>粘贴钥匙</h3>
-                <p>双击打开，点右上角设置，把你从模型官网复制来的 API Key 粘进去，保存。</p>
+                <h3>第一次打开会弹一个警告</h3>
+                <p>Windows 会说「已保护你的电脑」—— 点<strong>「更多信息」</strong>，再点<strong>「仍要运行」</strong>。这是因为我们没买微软的签名证书，不是病毒。</p>
               </div>
             </li>
             <li class="reveal">
               <span class="step-num">3</span>
               <div>
-                <h3>开聊</h3>
-                <p>在下面的输入框里说你要干嘛。比如「帮我把下载文件夹里的图片按月份分好」。</p>
+                <h3>填一串密码（只有这一步有点麻烦）</h3>
+                <p>MollyPaw 自己不带 AI，它要连一家 AI 公司。<strong>注册、拿到钥匙、粘进去</strong>，三步。下面详细写。</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="step-num">4</span>
+              <div>
+                <h3>开始打字</h3>
+                <p>在输入框说你要干什么，像发微信一样。比如「把桌面上的截图按日期分好类」。</p>
               </div>
             </li>
           </ol>
 
-          <aside class="plain-card reveal">
-            <h3>🔑 API 钥匙是什么？</h3>
-            <p>AI 不是免费的公共设施，它由各家厂商提供。你要先去厂商网站注册一个账号，拿到一串「钥匙」，填进 MollyPaw，它才能替你问 AI。</p>
-            <p class="muted">常见去处：DeepSeek、Kimi、通义、OpenAI、Anthropic。价格按用量算，聊天级别一个月通常几块钱。</p>
+          <aside class="plain-card reveal" id="whatis">
+            <h3>🔑 那串「钥匙」是什么，怎么弄到手</h3>
+            <p>
+              把 MollyPaw 想成<strong>一台没有大脑的机器人</strong>：它会动手，但不会思考。
+              「大脑」是别人家的，就像你手机里的豆包、Kimi 那样。
+            </p>
+            <p>
+              <strong>钥匙</strong>就是你去那家领的通行证，长得像一串乱码：<code>sk-a1b2c3d4...</code>。
+              填进 MollyPaw，它才能替你问那边。
+            </p>
+
             <div class="plain-tip">
-              <strong>不想花钱？</strong> 用本地的开源模型，全程离线、零费用，但要你自己装一次模型。装好之后在设置里把地址填成本机地址就行。
+              <p class="tip-lead">
+                <strong>下面照着点就行（用 DeepSeek，最便宜）。</strong>
+                全程在电脑上操作，大概 5 分钟。
+              </p>
+              <ol class="mini-steps">
+                <li>
+                  打开你电脑上的<strong>浏览器</strong>（就是平时上网那个，Edge / Chrome 都行）。
+                </li>
+                <li>
+                  在最上面那条长长的输入框里，打字输入这个地址，然后按回车：<br>
+                  <code class="addr">platform.deepseek.com</code>
+                  <button class="copy-inline" data-copy="platform.deepseek.com" type="button">复制</button>
+                </li>
+                <li>
+                  页面上会让你登录。填你的<strong>手机号</strong>，点「发送验证码」，
+                  然后看手机短信，把那 6 个数字填进去，点登录。
+                </li>
+                <li>
+                  第一次用会让你做<strong>实名认证</strong>（填姓名和身份证号）。
+                  这是国家要求的，所有 AI 平台都要，不是我们骗你。
+                </li>
+                <li>
+                  登录进去后，左边一排菜单里点「<strong>充值</strong>」，
+                  充 <strong>10 块钱</strong>（够你聊很久了），用微信或支付宝都行。
+                </li>
+                <li>
+                  再点左边的「<strong>API keys</strong>」，点右上角黑色的「<strong>创建 API key</strong>」按钮。
+                </li>
+                <li>
+                  屏幕中间会弹出一串 <code>sk-</code> 开头的东西 ——
+                  <strong>这就是钥匙</strong>。点旁边的「复制」，<strong>立刻</strong>粘到 MollyPaw 设置里。
+                </li>
+              </ol>
             </div>
+
+            <div class="plain-warn">
+              <strong>⚠️ 两个坑，踩了就白干：</strong>
+              <ul class="warn-list">
+                <li>那串钥匙<strong>只显示这一次</strong>。关掉弹窗就再也看不到了，只能删了重新建一个。</li>
+                <li>别把钥匙发给任何人。谁拿到都能花你的钱，发群聊截图前记得打码。</li>
+              </ul>
+            </div>
+
             <button class="btn btn-outline btn-block switch-hint" data-goto-mode="dev" type="button">
               我是开发者，给我看技术版 →
             </button>
@@ -400,7 +459,7 @@
         <span class="eyebrow">下载</span>
         <h2 class="only-lite">点一下就下载，<em>不用注册</em></h2>
         <h2 class="only-dev">下载 / 镜像 / 校验</h2>
-        <p class="only-lite">版本信息直接从 GitHub 实时读取，不会给你过期的安装包。</p>
+        <p class="only-lite">下面显示的版本号是我们实时查到的，不会给你过期的安装包。</p>
         <p class="only-dev">版本与资产列表从 GitHub Releases 实时拉取；本地 <code>releases.json</code> 仅作离线兜底。</p>
       </header>
 
@@ -451,20 +510,23 @@
         <div class="plain-card reveal install-card">
           <h3>下载之后怎么弄？</h3>
           <ol class="install-steps">
-            <li>Windows 可能会弹「已保护你的电脑」。点「<strong>更多信息</strong>」→「<strong>仍要运行</strong>」。这是没买签名证书的正常现象，不是病毒。</li>
-            <li>文件放桌面就行，<strong>不需要安装</strong>。以后想删掉直接删文件。</li>
-            <li>第一次打开会让你填 API 钥匙。没钥匙先去模型官网注册一个，复制过来粘上。</li>
-            <li>填完就能聊了。旁边那只狗是摩尼，点它可以跟它玩。</li>
+            <li>下载好之后，桌面上会多一个 <strong>MollyPaw</strong> 图标。双击它，软件就开了。</li>
+            <li>Windows 可能弹「已保护你的电脑」。点「<strong>更多信息</strong>」→「<strong>仍要运行</strong>」。这是因为没买微软的签名证书，不是病毒。</li>
+            <li>图标<strong>不用安装</strong>，就放桌面。哪天不想用了，直接拖进垃圾桶删掉。</li>
+            <li>第一次打开会问你「钥匙」。没钥匙就按上面的方法去领一个，粘进来。</li>
+            <li>填完就能聊了。旁边那只小狗是摩尼，点它可以跟它玩。</li>
           </ol>
           <div class="plain-tip">
-            <strong>找不到 API 钥匙？</strong> 小白推荐先试 <strong>DeepSeek</strong>：官网注册 → 充值几块钱 → 在「API Keys」页面新建一个 → 复制以 <code>sk-</code> 开头的那串。然后打开 MollyPaw 设置，供应商选 DeepSeek，把钥匙粘进去即可。
+            <strong>卡在哪一步了？</strong>
+            大概率是这几件事：找不到「API Keys」在哪、复制的时候少复制了字符、或者粘进去多了空格。
+            删掉重来一次，通常就好了。
           </div>
         </div>
 
         <div class="plain-card reveal warn-card">
-          <h3>⚠️ 只有 Windows 版</h3>
-          <p>MollyPaw 是<strong>Windows 原生应用</strong>，不是"跨平台套壳"。系统托盘、桌面宠物、WebView2 全部按 Windows 实现。</p>
-          <p class="muted">macOS / Linux 没有支持，也没有计划——别等，等不到。</p>
+          <h3>⚠️ 只有 Windows 电脑能用</h3>
+          <p>这是<strong>给 Windows 电脑做的</strong>。苹果电脑（Mac）和装了 Linux 的电脑都用不了。</p>
+          <p class="muted">手机上也不行，它是电脑软件，不是 App。</p>
         </div>
       </div>
 
@@ -516,7 +578,7 @@
         <span class="eyebrow">在线试用</span>
         <h2 class="only-lite">不用下载，<em>先点两下试试</em></h2>
         <h2 class="only-dev">在线 Demo · 就是真实前端</h2>
-        <p class="only-lite">这就是软件本来的样子，左边点对话，右边随便点。发消息被锁了——真聊起来得下载后接你自己的模型。</p>
+        <p class="only-lite">这就是软件本来的样子，左边点对话，右边随便点。发消息被锁住了——真想聊得下载下来，接上你自己的钥匙。</p>
         <p class="only-dev">这个 Demo 跑的是主仓库 <code>frontend/</code> 的真实代码，只把 <code>/api/*</code> 换成了假响应。可以切对话、翻历史、开设置看配置项。</p>
       </header>
 
@@ -548,7 +610,7 @@
         <span class="eyebrow">桌面宠物</span>
         <h2 class="only-lite">摩尼会<em>替 AI 表达心情</em></h2>
         <h2 class="only-dev">摩尼会<em>替 Agent 表达情绪</em></h2>
-        <p class="only-lite">它在干嘛，你不用看日志，看一眼狗就行。点下面四个卡片试试。</p>
+        <p class="only-lite">它现在在干什么，你不用看那些看不懂的字，看一眼小狗就知道了。点下面四张卡片试试。</p>
         <p class="only-dev">主进程维护状态，宠物进程每秒轮询一次 —— 它在干嘛，你看一眼就知道。</p>
       </header>
 
@@ -719,43 +781,43 @@
         <div class="faq">
           <details open>
             <summary>我完全不会写代码，能用吗？</summary>
-            <p>能。你是使用者，不是开发者。下载 exe、双击、粘一次 API Key，剩下的就是打字聊天。</p>
+            <p>能。这东西就是给不会写代码的人用的。你要做的只有三件事：下载、双击、粘一次钥匙。剩下全是打字聊天。</p>
           </details>
           <details>
             <summary>要我注册账号吗？</summary>
-            <p>MollyPaw 自己不需要账号。但你得有一个 AI 模型提供方的账号，因为 AI 是那边在算钱。</p>
+            <p>MollyPaw 自己不用注册。但「钥匙」得去 AI 那边领，所以那边要注册一个，用手机号就行。</p>
           </details>
           <details>
             <summary>要花多少钱？</summary>
-            <p>程序本身永久免费。模型按用量计费，普通聊天一个月几块钱；用本地模型就是零成本。</p>
+            <p>软件不要钱，一直免费，不是试用。给 AI 那边的钱按用量算，普通聊天一个月几块钱，大概一杯奶茶。</p>
           </details>
           <details>
             <summary>我的文件安全吗？</summary>
-            <p>程序在你电脑上跑，文件也在本地。只有你主动让它做的事，内容才会发给你配置的那家模型。</p>
+            <p>软件在你电脑上跑，文件也在你电脑上。只有你主动让它做的事，内容才会发给你选的那家 AI。</p>
           </details>
           <details>
             <summary>它到底能帮我做什么？</summary>
-            <p>整理下载文件夹、把一堆文档读成摘要、翻译、改代码、批量重命名、写脚本 —— 你描述目标，它动手。</p>
+            <p>把乱糟糟的下载文件夹归类、把一堆 PDF 读完给你总结、翻译、批量改文件名、整理照片。你描述清楚要什么，它动手。</p>
           </details>
           <details>
             <summary>它记不记得住我说过的话？</summary>
-            <p>记得。你在一个对话里的上下文它保持；你告诉过它的长期偏好和要求，它也会记下来，换个对话照样认。它还会在空闲时自己「睡一觉」，把重要的事整理进长期记忆，不重要的丢掉。</p>
+            <p>记得。同一段聊天里的事它一直记着；你告诉过它的长期习惯，换个对话它也认。它还会在闲着的时候自己「睡一觉」，把重要的事记下来，不重要的丢掉。</p>
           </details>
           <details>
-            <summary>GitHub 打不开，下载不动怎么办？</summary>
-            <p>正常，国内直连 GitHub 就是会抽。用上面的<strong>国内加速镜像</strong>，随便挑一个，下下来的文件跟官方一模一样。</p>
+            <summary>下载不动 / 点下载没反应怎么办？</summary>
+            <p>多试几次，或者用下面「换条线路」里别的线路。哪个能下就用哪个，文件完全一样。</p>
           </details>
           <details>
             <summary>Windows 说「已保护你的电脑」？</summary>
-            <p>因为我们没买代码签名证书（那玩意儿挺贵）。点「更多信息」→「仍要运行」就行。不放心可以不装。</p>
+            <p>因为我们没买微软那个签名证书（挺贵的）。点「更多信息」→「仍要运行」就行。实在不放心就别装。</p>
           </details>
           <details>
-            <summary>那只狗能关掉吗？</summary>
-            <p>能。宠物是独立的小窗口，关掉完全不影响聊天。</p>
+            <summary>那只小狗能关掉吗？</summary>
+            <p>能。它是个小窗口，关掉完全不影响聊天。</p>
           </details>
           <details>
             <summary>装了打不开怎么办？</summary>
-            <p>先确认系统是 Windows 10/11。还是不行的话去 GitHub 提个 Issue，把报错截图贴上去。</p>
+            <p>先确认你的电脑是 Windows 10 或 11。还不行的话，把报错的画面截图，发到下面那个反馈的地方，我们看看。</p>
           </details>
         </div>
       </div>

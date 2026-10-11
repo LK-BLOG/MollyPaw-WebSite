@@ -78,6 +78,18 @@
         applyMode(getMode() === 'lite' ? 'dev' : 'lite');
       });
     }
+    var navEntry = document.getElementById('navModeEntry');
+    if (navEntry) {
+      navEntry.addEventListener('click', function (e) {
+        e.preventDefault();
+        applyMode(getMode() === 'lite' ? 'dev' : 'lite');
+        if (links) {
+          links.classList.remove('open');
+          if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
     document.querySelectorAll('[data-goto-mode]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         applyMode(btn.dataset.gotoMode, { force: true });
@@ -150,27 +162,33 @@
   }
 
   /* ---------- 复制 ---------- */
-  document.querySelectorAll('.copy-btn').forEach(function (copyBtn) {
+  // .copy-btn（带图标+文字）和 .copy-inline（地址旁边的小胶囊）都走这套
+  document.querySelectorAll('.copy-btn, .copy-inline').forEach(function (copyBtn) {
     if (!navigator.clipboard) return;
     var label = copyBtn.querySelector('span');
-    var original = label ? label.textContent : '复制';
+    var original = label ? label.textContent : copyBtn.textContent;
     copyBtn.addEventListener('click', function () {
       var text = copyBtn.dataset.copy || '';
       if (!text) {
         if (label) label.textContent = '暂无内容';
-        setTimeout(function () { if (label) label.textContent = original; }, 1600);
         return;
       }
       navigator.clipboard.writeText(text).then(function () {
         copyBtn.classList.add('ok');
         if (label) label.textContent = '已复制';
+        else copyBtn.textContent = '已复制';
         setTimeout(function () {
           copyBtn.classList.remove('ok');
           if (label) label.textContent = original;
+          else copyBtn.textContent = original;
         }, 1800);
       }).catch(function () {
         if (label) label.textContent = '复制失败';
-        setTimeout(function () { if (label) label.textContent = original; }, 1800);
+        else copyBtn.textContent = '复制失败';
+        setTimeout(function () {
+          if (label) label.textContent = original;
+          else copyBtn.textContent = original;
+        }, 1800);
       });
     });
   });

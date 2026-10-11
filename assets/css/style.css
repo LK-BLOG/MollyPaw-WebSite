@@ -270,6 +270,43 @@ html[data-mode="dev"] .ms-thumb { transform: translateX(100%); }
 }
 .copy-inline:hover { background: var(--orange-600); }
 .copy-inline.ok { background: var(--brown-700); }
+/* 「在哪儿输入地址」的示意图，纯 CSS 画，别让用户找 */
+.where-bar { margin: 10px 0 2px; }
+.wb-window {
+  border: 2px solid var(--brown-300); border-radius: 10px; overflow: hidden;
+  background: var(--white); max-width: 340px;
+}
+.wb-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; background: var(--brown-100);
+  border-bottom: 1px solid var(--brown-200);
+}
+.wb-back, .wb-fwd {
+  width: 16px; height: 16px; border-radius: 50%; flex: none;
+  background: var(--brown-300);
+}
+.wb-input {
+  flex: 1; background: var(--white); border: 2px solid var(--orange);
+  border-radius: 999px; padding: 4px 12px;
+  font-size: 12.5px; color: var(--brown-600);
+  font-family: var(--mono);
+}
+.wb-body { padding: 12px; font-size: 12px; color: var(--brown-500); }
+.wb-tip { margin-top: 6px; font-size: 13px; font-weight: 800; color: var(--orange-600); }
+/* 认回车键：不靠位置和大小，靠那个弯箭头符号 */
+.key-hint { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 10px 0 8px; }
+.key {
+  display: inline-block; background: var(--white);
+  border: 2px solid var(--brown-500); border-bottom-width: 4px;
+  border-radius: 8px; padding: 6px 16px;
+  font-family: var(--mono); font-size: 15px; font-weight: 800; color: var(--brown-700);
+}
+.key-tip { font-size: 13.5px; color: var(--brown-600); }
+.recover {
+  background: var(--brown-100); border-radius: var(--radius-s);
+  padding: 10px 14px; font-size: 14.5px; color: var(--brown-700); line-height: 1.7;
+}
+html[data-mode="dev"] .recover { background: var(--brown-100); color: var(--text); }
 .warn-list { margin: 8px 0 0; padding-left: 20px; }
 .warn-list li { margin-bottom: 6px; line-height: 1.65; }
 .plain-warn {

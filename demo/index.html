@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -115,10 +115,13 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
 
   window.fetch = function (input, init) {
     var url = typeof input === 'string' ? input : (input && input.url) || '';
-    if (url.indexOf('127.0.0.1:18765') === -1) {
+    // 前端 API_BASE 现在是相对路径（''），所以这里按「路径是否以 /api/ 开头」
+    // 判断，而不是匹配写死的 127.0.0.1:18765 —— 否则演示页所有请求都会漏到
+    // realFetch，整站交互静默失效。
+    var path = url.replace(/^https?:\/\/[^/]+/, '');
+    if (path.indexOf('/api/') !== 0) {
       return realFetch ? realFetch(input, init) : Promise.reject(new Error('blocked'));
     }
-    var path = url.replace(/^https?:\/\/127\.0\.0\.1:18765/, '');
     var payload = { ok: true };
     var body = {};
     try { body = JSON.parse((init && init.body) || '{}'); } catch (e) {}
@@ -146,6 +149,16 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
       payload = { ok: true, pending: true };
     } else if (path.indexOf('/api/conversations') === 0) {
       payload = { ok: true, conversations: CONVS };
+    } else if (path.indexOf('/api/version') === 0) {
+      payload = { ok: true, version: '0.0.0.2.1' };
+    } else if (path.indexOf('/api/update/check') === 0) {
+      // 演示页永远不弹更新弹窗（真弹了会挡在正中间，把 demo 毁掉）
+      payload = { ok: true, available: false, current: '0.0.0.2.1', latest: '0.0.0.2.1' };
+    } else if (path.indexOf('/api/relay/') === 0) {
+      // 远程互联面板在演示里只是个样子，别让它报错
+      payload = { ok: true, running: false, connected: false, state: 'stopped',
+                  devices: [], entries: [], pin: null, psk: '', psk_set: false,
+                  psk_problems: [], url: 'wss://mollypaw-online.pages.dev/server' };
     } else if (path.indexOf('/api/balance') === 0) {
       payload = { ok: true, supported: true, currency: 'CNY', balance: 12.83,
                   balances: [{ currency: 'CNY', balance: 12.83 }, { currency: 'USD', balance: 1.76 }] };
@@ -252,7 +265,26 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
       <div class="composer">
         <div class="input-wrapper">
           <textarea id="user-input" data-i18n="input_placeholder" data-i18n-attr="placeholder" placeholder="Ask MollyPaw anything..." rows="1"></textarea>
-          <button id="send-btn" class="send-btn" disabled data-i18n="send">发送</button>
+          <button id="stop-btn" class="stop-btn" type="button" style="display:none;"
+                  data-i18n-attr="title" data-i18n="stop" title="停止">
+            <svg class="icon-stop" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <rect x="6.5" y="6.5" width="11" height="11" rx="2.6" fill="currentColor"/>
+            </svg>
+            <!-- 正在停止：方块换成转圈，让人知道已经收到点击、正在打断 -->
+            <svg class="icon-busy" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
+                 fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+              <path d="M12 3.5a8.5 8.5 0 1 1-6.01 2.49"/>
+            </svg>
+          </button>
+          <button id="send-btn" class="send-btn" disabled
+                  data-i18n-attr="title" data-i18n="send" title="发送">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
+                 fill="none" stroke="currentColor" stroke-width="2.4"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19V5"/>
+              <path d="M6 11l6-6 6 6"/>
+            </svg>
+          </button>
         </div>
         <div class="input-status">
           <div class="status-left">
@@ -282,7 +314,7 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
                 </button>
               </div>
             </div>
-            <span id="balance-status">余额暂不可用</span>
+            <span id="balance-status" data-i18n="balance_unavailable">余额暂不可用</span>
           </div>
           <div class="status-right">
             <button id="model-menu-btn" class="status-btn model-menu-btn" type="button">模型</button>
@@ -297,6 +329,16 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
             </div>
           </div>
         </div>
+      </div>
+      <!-- 键位提示：一行小字，别抢戏，但得让人看得到 -->
+      <div class="kbd-hint-row">
+        <span class="kbd-hint">
+          <kbd>Enter</kbd> <span data-i18n="kbd_hint_insert">AI 工作时按 Enter 插入消息</span>
+        </span>
+        <span class="kbd-hint">
+          <kbd>Esc</kbd><kbd>Esc</kbd> <span data-i18n="kbd_hint_stop">连按两次 Esc 停止 AI</span>
+        </span>
+        <span id="queue-hint" class="queue-hint" hidden></span>
       </div>
       <p class="input-hint" data-i18n="hint">MollyPaw Beta 0.0.0.1.5</p>
     </div>
@@ -313,6 +355,7 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
         <div class="settings-tabs">
           <button type="button" class="settings-tab active" data-settings-tab="model">模型</button>
           <button type="button" class="settings-tab" data-settings-tab="permissions">权限</button>
+          <button type="button" class="settings-tab" data-settings-tab="relay" data-i18n="relay_title">远程互联</button>
           <button type="button" class="settings-tab" data-settings-tab="sleep">睡眠</button>
         </div>
         <div class="settings-tab-panel active" data-settings-panel="model">
@@ -358,12 +401,20 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
           </div>
         </div>
         <div class="form-group">
-          <label for="cfg-max-tool-rounds">最大工具轮次</label>
-          <input type="number" id="cfg-max-tool-rounds" min="1" max="1000" step="1" placeholder="100">
-        </div>
-        <div class="form-group">
-          <label for="cfg-max-tokens">最大输出 tokens</label>
-          <input type="number" id="cfg-max-tokens" min="256" step="1024" placeholder="32768">
+          <label for="cfg-max-tokens" data-i18n="max_tokens_label">最大输出 tokens</label>
+          <!--
+            允许留空 = 不发送该参数，由服务端决定（推荐）。
+            有些模型（尤其推理模型）不认 max_tokens，带了直接 400；
+            填一个超过模型总上下文的值也会被上游拒（实测：
+            OpenRouter 上报 "you requested about 2048012 tokens"）。
+            所以不强制必填，并且不再给一个"看着很大"的默认值。
+          -->
+          <input type="number" id="cfg-max-tokens" min="0" step="1024"
+                 data-i18n="max_tokens_ph" data-i18n-attr="placeholder"
+                 placeholder="留空 = 由服务端决定（推荐）">
+          <small class="field-hint" data-i18n="max_tokens_hint">
+            留空最安全。填了就必须小于模型上下文上限，否则上游会报 400。
+          </small>
         </div>
         <div class="form-group">
           <label for="cfg-temperature" data-i18n="temp_label">Temperature</label>
@@ -380,6 +431,129 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
           </select>
         </div>
         </div>
+        <div class="settings-tab-panel" data-settings-panel="relay">
+        <div class="relay-section">
+          <p class="relay-intro" data-i18n="relay_desc">让手机通过加密通道连上这台电脑。</p>
+
+          <!-- 状态条 -->
+          <div class="relay-status-row">
+            <span class="relay-state" id="relay-state" data-i18n="relay_stopped">已关闭</span>
+            <span class="relay-room" id="relay-room"></span>
+            <button id="relay-toggle" class="btn-secondary" type="button" data-i18n="relay_enable">开启远程互联</button>
+          </div>
+
+          <!-- 中继选择：官方 / 自建 -->
+          <!--
+            用户明确要求"给普通人的界面不该是一堆技术参数"，
+            所以默认走官方中继，自建是折叠的高级选项。
+          -->
+          <div class="form-group">
+            <label data-i18n="relay_server_label">中继服务器</label>
+            <div class="relay-server-choice" role="radiogroup">
+              <label class="relay-radio">
+                <input type="radio" name="relay-server" value="official" checked>
+                <span>
+                  <strong data-i18n="relay_server_official">官方中继（推荐）</strong>
+                  <small data-i18n="relay_server_official_hint">开箱即用，不用自己搭服务器</small>
+                </span>
+              </label>
+              <label class="relay-radio">
+                <input type="radio" name="relay-server" value="custom">
+                <span>
+                  <strong data-i18n="relay_server_custom">自建中继</strong>
+                  <small data-i18n="relay_server_custom_hint">你有自己的服务器时选这个</small>
+                </span>
+              </label>
+            </div>
+            <div id="relay-url-group" class="relay-url-group" hidden>
+              <input type="text" id="relay-url"
+                     placeholder="wss://your-relay.example.com/server">
+              <small class="relay-hint" data-i18n="relay_url_hint">
+                填你自己部署的中继地址，需以 ws:// 或 wss:// 开头
+              </small>
+            </div>
+          </div>
+
+          <!-- 连接密钥 -->
+          <div class="form-group">
+            <label for="relay-psk" data-i18n="relay_psk">连接密钥</label>
+            <!--
+              用 text 而不是 password：
+              这是一次性连接密钥，不是账号密码。用 password 会导致生成后看不见、
+              复制不了、浏览器也不给"显示密码"按钮（那只对自己输入过的登录框生效）。
+              再加一个"显示/隐藏"按钮，兼顾肩窥场景。
+            -->
+            <div class="relay-psk-row">
+              <input type="text" id="relay-psk" autocomplete="off" spellcheck="false"
+                     data-i18n="relay_psk_ph" data-i18n-attr="placeholder"
+                     placeholder="至少 16 位，含大写、小写、数字">
+              <button id="relay-psk-reveal" class="btn-secondary" type="button"
+                      data-i18n="relay_hide">隐藏</button>
+              <button id="relay-psk-copy" class="btn-secondary" type="button"
+                      data-i18n="relay_copy">复制</button>
+            </div>
+            <small id="relay-psk-hint" class="relay-hint"></small>
+            <div class="relay-psk-actions">
+              <button id="relay-psk-save" class="btn-secondary" type="button" data-i18n="relay_psk_save">保存密钥</button>
+              <button id="relay-psk-gen" class="link-btn" type="button" data-i18n="relay_psk_gen">随机生成一个</button>
+            </div>
+          </div>
+
+          <!-- 配对：扫码即连 -->
+          <div class="relay-pair-block">
+            <div class="relay-pair-head">
+              <strong data-i18n="relay_add_device">添加设备</strong>
+              <div class="relay-pair-actions">
+                <button id="relay-add-app" class="btn-secondary" type="button" data-i18n="relay_add_device">添加设备</button>
+                <button id="relay-add-obs" class="link-btn" type="button" data-i18n="relay_add_observer">添加只读设备</button>
+              </div>
+            </div>
+            <div id="relay-pair-box" class="relay-pair-box" hidden>
+              <!-- 二维码：手机扫一下就配对，不用手输密钥 -->
+              <div class="relay-qr-wrap">
+                <img id="relay-qr" class="relay-qr" alt="配对二维码">
+              </div>
+              <p class="relay-pin-hint" data-i18n="relay_scan_hint">
+                用手机 App 扫这个码就能连上，不用手输密钥。
+              </p>
+              <details class="relay-code-manual">
+                <summary data-i18n="relay_code_manual">手机扫不了？手动复制配对码</summary>
+                <div class="relay-code-row">
+                  <input type="text" id="relay-code" readonly spellcheck="false">
+                  <button id="relay-code-copy" class="btn-secondary" type="button" data-i18n="relay_copy">复制</button>
+                </div>
+              </details>
+              <div class="relay-pin-meta">
+                <span><span data-i18n="relay_pin_ttl">剩余</span> <b id="relay-pin-ttl">900</b>s</span>
+                <span id="relay-pair-role"></span>
+                <button id="relay-pin-cancel" class="link-btn" type="button" data-i18n="relay_cancel">取消</button>
+              </div>
+              <p class="relay-warn" data-i18n="relay_code_warning">
+                配对码等于临时钥匙，别截图发群里。15 分钟内有效，用过一次就作废。
+              </p>
+            </div>
+          </div>
+
+          <!-- 设备列表 -->
+          <div class="relay-devices-block">
+            <strong data-i18n="relay_devices">已配对设备</strong>
+            <div id="relay-device-list" class="relay-device-list"></div>
+            <div class="relay-device-bulk">
+              <button id="relay-revoke-all" class="link-btn danger" type="button"
+                      data-i18n="relay_revoke_all">全部吊销</button>
+              <small data-i18n="relay_revoke_all_hint">
+                换密钥后旧设备仍能连（只是连不上现在的房间），要彻底清退点这里
+              </small>
+            </div>
+          </div>
+
+          <!-- 审计日志 -->
+          <details class="relay-audit">
+            <summary data-i18n="relay_audit">文件访问日志</summary>
+            <div id="relay-audit-list" class="relay-audit-list"></div>
+          </details>
+        </div>
+        </div>
         <div class="settings-tab-panel" data-settings-panel="sleep">
         <div class="sleep-section">
           <div class="sleep-section-head">
@@ -393,10 +567,6 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
               <option value="display_only">只显示</option>
               <option value="full">完整</option>
             </select>
-          </div>
-          <div class="form-group">
-            <label for="cfg-sleep-max-calls">单任务最大 LLM 调用</label>
-            <input type="number" id="cfg-sleep-max-calls" min="1" max="500" step="1" value="100">
           </div>
           <div class="form-group">
             <label>整理任务</label>
@@ -445,6 +615,44 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
           <input type="checkbox" id="approval-always-check"> <span data-i18n="approval_always">Always approve in this session</span>
         </label>
       </div>
+    </div>
+  </div>
+
+  <!-- 自动更新：弹窗确认（带更新内容） + 左下角下载进度 -->
+  <div class="update-overlay" id="update-overlay" style="display:none;">
+    <div class="update-modal">
+      <div class="update-header">
+        
+        <h3 id="update-title" data-i18n="update_title">有新版本可用</h3>
+      </div>
+      <div class="update-versions">
+        <span class="update-from" id="update-from"></span>
+        <span class="update-arrow">&#8594;</span>
+        <span class="update-to" id="update-to"></span>
+      </div>
+      <div class="update-notes-wrap">
+        <div class="update-notes-label" data-i18n="update_notes">更新内容</div>
+        <div class="update-notes" id="update-notes"></div>
+      </div>
+      <div class="update-error" id="update-error" hidden></div>
+      <div class="update-actions">
+        <button id="update-later" class="btn-reject" data-i18n="update_later">稍后再说</button>
+        <button id="update-now" class="btn-approve" data-i18n="update_now">立即更新</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 左下角下载进度条 -->
+  <div class="update-progress" id="update-progress" hidden>
+    <div class="update-progress-head">
+      <span id="update-progress-label" data-i18n="update_downloading">正在下载新版本</span>
+      <span id="update-progress-pct">0%</span>
+    </div>
+    <div class="update-progress-track">
+      <div class="update-progress-fill" id="update-progress-fill"></div>
+    </div>
+    <div class="update-progress-actions" id="update-progress-actions" hidden>
+      <button id="update-restart" class="btn-approve btn-small" data-i18n="update_restart">重启并安装</button>
     </div>
   </div>
 
@@ -506,7 +714,8 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
   var realFetch = window.fetch;
   window.fetch = function (input, init) {
     var url = typeof input === 'string' ? input : (input && input.url) || '';
-    if (url.indexOf('/api/chat') !== -1) {
+    var path = url.replace(/^https?:\/\/[^/]+/, '');
+    if (path.indexOf('/api/chat') === 0) {
       toast('\u6f14\u793a\u6a21\u5f0f\u53d1\u4e0d\u51fa\u6d88\u606f');
       return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ ok: true, pending: true }); } });
     }

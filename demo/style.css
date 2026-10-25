@@ -1,4 +1,4 @@
-﻿/* MollyPaw - Warm Brown & White Theme */
+/* MollyPaw - Warm Brown & White Theme */
 
 :root {
   --deep-brown: #6B4226;
@@ -312,15 +312,16 @@ body {
 }
 #user-input::placeholder { color: var(--tan); }
 
-.send-btn {
-  width: auto;
-  min-width: 58px;
-  height: 36px;
-  padding: 0 14px;
+/* 发送 / 停止：都是一个圆，里面换个图形。
+   发送 = 圆 + 向上箭头；停止 = 圆 + 圆角方块。没有文字，靠 title 提示。 */
+.send-btn,
+.stop-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
   border: none;
-  border-radius: 9px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 50%;
   background: var(--paw-orange);
   color: var(--pure-white);
   cursor: pointer;
@@ -328,17 +329,85 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: opacity 0.15s, transform 0.1s;
+  transition: opacity 0.15s, transform 0.1s, background 0.15s;
 }
-.send-btn:disabled { opacity: 0.35; cursor: default; }
-.send-btn:not(:disabled):hover { opacity: 0.9; }
-.send-btn:not(:disabled):active { transform: scale(0.93); }
+
+.send-btn:disabled { opacity: 0.32; cursor: default; }
+.send-btn:not(:disabled):hover { opacity: 0.92; }
+.send-btn:not(:disabled):active { transform: scale(0.92); }
+
+/* 停止按钮：只在 agent 跑着的时候出现 */
+.stop-btn {
+  margin-right: 8px;
+  background: var(--deep-brown);
+}
+
+.stop-btn:hover:not(:disabled) { background: #56341D; }
+.stop-btn:active:not(:disabled) { transform: scale(0.93); }
+.stop-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* 两个按钮里的 svg 都跟着按钮文字色走 */
+.send-btn svg,
+.stop-btn svg { display: block; }
 
 .input-hint {
   text-align: center;
   font-size: 11px;
   color: var(--tan);
   margin-top: 8px;
+}
+
+/* ---- 键位提示 / 排队提示 ---- */
+.kbd-hint-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--tan);
+}
+
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: .82;
+}
+
+.kbd-hint kbd {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 5px;
+  border: 1px solid var(--tan);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--warm-white, #F5EDE3);
+  color: var(--deep-brown);
+  font-family: inherit;
+  font-size: 10.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.queue-hint {
+  color: var(--paw-orange);
+  font-weight: 600;
+}
+
+/* 停止中：方块 -> 转圈。
+   转圈是"我收到了你的点击、正在打断"的唯一信号，不然按钮看着像没反应。 */
+.stop-btn .icon-busy { display: none; }
+.stop-btn.stopping { cursor: default; }
+.stop-btn.stopping .icon-stop { display: none; }
+.stop-btn.stopping .icon-busy {
+  display: block;
+  animation: mollypaw-spin .75s linear infinite;
+}
+
+@keyframes mollypaw-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ---- Settings Modal ---- */
@@ -396,7 +465,10 @@ body {
   color: var(--mid-brown);
   margin-bottom: 6px;
 }
-.form-group input {
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="number"],
+.form-group input:not([type]) {
   width: 100%;
   padding: 9px 12px;
   border: 1.5px solid var(--tan);
@@ -407,7 +479,23 @@ body {
   outline: none;
   transition: border-color 0.15s;
 }
-.form-group input:focus { border-color: var(--paw-orange); }
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input:not([type]):focus { border-color: var(--paw-orange); }
+
+/* 单选 / 复选按钮不能吃到上面那条"文本框"样式。
+   早先 .form-group input 是通配的，把 radio 也设成 width:100% +
+   内边距 + 边框，结果收音机跑到整行最右边、还带着输入框外观 ——
+   看起来就是"选择按钮偏了一头大象"。 */
+.form-group input[type="radio"],
+.form-group input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  accent-color: var(--paw-orange);
+}
 
 .form-actions {
   position: sticky;
@@ -529,6 +617,34 @@ body {
   display: none;
 }
 .tool-call-indicator.expanded .tc-args {
+  display: block;
+}
+
+.tc-toggle {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--light-brown);
+  opacity: .75;
+}
+
+.tool-call-indicator .tc-result {
+  margin: 4px 0;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, .66);
+  border: 1px solid rgba(107, 66, 38, .12);
+  border-radius: 6px;
+  font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--deep-brown);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow: auto;
+  display: none;
+}
+
+.tool-call-indicator.expanded .tc-result {
   display: block;
 }
 
@@ -1214,3 +1330,738 @@ body {
 }
 .settings-tab-panel { display: none; }
 .settings-tab-panel.active { display: block; }
+
+/* ============================================================
+   远程互联面板
+   ============================================================ */
+.relay-section { display: flex; flex-direction: column; gap: 16px; }
+.relay-intro { font-size: 13px; color: var(--mid-brown); margin: 0; line-height: 1.6; }
+.relay-intro code {
+  background: var(--cream);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* ------------------------------------------------------------------
+   按钮布局修复（重要）
+   全局 .btn-secondary 是给底部"保存/取消"那一行设计的：flex:1 + padding:9px 0，
+   两个按钮对半分。把它用到面板里就会出事：
+     - 开关按钮被撑满整行（411px）
+     - "添加设备"被挤到 54px，文字都放不下（用户原话：撑爆了）
+   所以在这个面板内把按钮还原成"按内容宽度 + 正常水平内边距"。
+   ------------------------------------------------------------------ */
+.relay-section .btn-secondary {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 9px 16px;
+  white-space: nowrap;
+}
+.relay-section .link-btn {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--paw-orange);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.relay-section .link-btn:hover { color: var(--deep-brown); }
+.relay-section .link-btn.danger { color: #a94442; }
+
+/* 小屏：按钮组换行，别横向溢出 */
+.relay-section .relay-status-row,
+.relay-section .relay-psk-actions,
+.relay-section .relay-pair-head,
+.relay-section .relay-pair-actions {
+  flex-wrap: wrap;
+}
+
+.relay-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--cream);
+  border-radius: 10px;
+}
+.relay-state {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(107, 66, 38, 0.1);
+  color: var(--deep-brown);
+}
+.relay-state.connected { background: rgba(76, 140, 84, 0.16); color: #3d6f44; }
+.relay-state.error { background: rgba(169, 68, 66, 0.14); color: #a94442; }
+.relay-state.reconnecting,
+.relay-state.starting { background: rgba(212, 130, 58, 0.16); color: #a8622a; }
+.relay-room {
+  font-size: 12px;
+  color: var(--mid-brown);
+  font-family: ui-monospace, Consolas, monospace;
+  margin-right: auto;
+}
+.relay-hint { display: block; font-size: 12px; color: var(--mid-brown); margin-top: 5px; min-height: 16px; }
+.relay-hint.bad { color: #a94442; }
+.relay-hint.ok { color: #3d6f44; }
+
+/* 密钥一行：输入框 + 复制按钮 */
+.relay-psk-row { display: flex; gap: 8px; align-items: center; }
+.relay-psk-row input { flex: 1 1 auto; min-width: 0; font-family: ui-monospace, Consolas, monospace; }
+.relay-psk-row .btn-secondary { flex: 0 0 auto; padding: 9px 14px; }
+
+.relay-psk-actions { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+
+.relay-pair-block {
+  border: 1px solid var(--light-brown);
+  border-radius: 10px;
+  padding: 14px;
+}
+.relay-pair-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.relay-pair-head strong { font-size: 13.5px; }
+.relay-pair-actions { display: flex; gap: 12px; align-items: center; }
+
+.relay-pair-box {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--light-brown);
+  text-align: center;
+}
+.relay-pin {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--deep-brown);
+  line-height: 1.2;
+  user-select: all;
+}
+.relay-pin-hint { font-size: 12.5px; color: var(--mid-brown); margin: 8px 0 10px; }
+.relay-pin-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 12.5px;
+  color: var(--mid-brown);
+}
+
+/* ---- 中继服务器单选（官方 / 自建）------------------------------------
+   这些元素以前一条 CSS 都没有，结果 radio 跑到右边、文字换行，
+   整块看起来是歪的。新增 UI 必须配 CSS —— 不写就一定歪。
+   ---- */
+.relay-server-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.relay-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--light-brown);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.relay-radio:hover { background: var(--cream); }
+.relay-radio input[type="radio"] {
+  flex: 0 0 auto;
+  margin: 3px 0 0;
+  accent-color: var(--paw-orange);
+}
+.relay-radio > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.relay-radio strong { font-size: 13.5px; font-weight: 600; }
+.relay-radio small { font-size: 12px; color: var(--mid-brown); line-height: 1.5; }
+.relay-radio input:checked + span strong { color: var(--paw-orange); }
+
+.relay-url-group { margin-top: 10px; }
+.relay-url-group input { width: 100%; }
+
+/* ---- 密钥遮罩 --------------------------------------------------------
+   输入框是 type=text（为了能看见、能复制），
+   遮罩靠 CSS 做，兼顾"看得见"和"别被旁边人瞄到"。
+   ---- */
+#relay-psk.masked {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
+/* ---- 二维码 ---------------------------------------------------------- */
+.relay-qr-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background: var(--pure-white);
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+.relay-qr {
+  width: 200px;
+  height: 200px;
+  /* 二维码放大必须用最近邻，模糊了手机扫不出来 */
+  image-rendering: pixelated;
+}
+
+.relay-code-manual {
+  text-align: left;
+  margin: 10px 0;
+  border: 1px dashed var(--light-brown);
+  border-radius: 9px;
+  padding: 8px 12px;
+}
+.relay-code-manual summary {
+  font-size: 12.5px;
+  color: var(--mid-brown);
+  cursor: pointer;
+}
+.relay-code-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.relay-code-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11.5px;
+}
+.relay-code-row .btn-secondary { flex: 0 0 auto; padding: 9px 14px; }
+
+.relay-warn {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  background: rgba(212, 130, 58, 0.1);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8a5423;
+  text-align: left;
+}
+
+/* ---- 设备清退 -------------------------------------------------------- */
+.relay-device-bulk {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.relay-device-bulk small {
+  flex: 1 1 200px;
+  font-size: 11.5px;
+  color: var(--mid-brown);
+  line-height: 1.5;
+}
+
+.relay-devices-block { display: flex; flex-direction: column; gap: 8px; }
+.relay-devices-block > strong { font-size: 13.5px; }
+.relay-device-list { display: flex; flex-direction: column; gap: 8px; }
+.relay-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--light-brown);
+  border-radius: 9px;
+}
+.relay-device.revoked { opacity: 0.55; }
+.relay-device-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.relay-device-main strong { font-size: 13px; }
+.relay-device-main small { font-size: 11.5px; color: var(--mid-brown); }
+.relay-device-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.relay-empty { font-size: 12.5px; color: var(--mid-brown); padding: 6px 0; }
+
+.relay-audit {
+  border: 1px solid var(--light-brown);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.relay-audit summary { font-size: 13px; cursor: pointer; }
+.relay-audit-list {
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 10px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11.5px;
+}
+.relay-audit-line {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--cream);
+  word-break: break-all;
+}
+
+.link-btn.danger { color: #a94442; }
+
+
+/* 表单字段下方的说明文字 */
+.field-hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--mid-brown);
+}
+
+
+/* ---------- 自动更新 ---------- */
+
+.update-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(58, 42, 26, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.update-modal {
+  width: min(560px, 100%);
+  max-height: min(76vh, 640px);
+  display: flex;
+  flex-direction: column;
+  background: #FFF8F0;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(107, 66, 38, .26);
+  overflow: hidden;
+}
+
+.update-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px 6px;
+}
+
+.update-header h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #6B4226;
+}
+
+.update-icon { font-size: 20px; }
+
+.update-versions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px 12px;
+  font-size: 14px;
+  color: #8B5E3C;
+}
+
+.update-from { opacity: .7; }
+.update-arrow { color: #D4823A; font-weight: 700; }
+.update-to { color: #D4823A; font-weight: 700; }
+
+.update-notes-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+
+.update-notes-label {
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: #A67B5B;
+  margin-bottom: 6px;
+}
+
+.update-notes {
+  flex: 1;
+  min-height: 120px;
+  overflow-y: auto;
+  background: #F5EDE3;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.62;
+  color: #6B4226;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.update-notes h1, .update-notes h2, .update-notes h3 {
+  font-size: 14px;
+  margin: 12px 0 6px;
+  color: #6B4226;
+}
+
+.update-notes ul { margin: 6px 0; padding-left: 20px; }
+.update-notes li { margin: 3px 0; }
+.update-notes code {
+  background: #F5EDE3;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 12px;
+}
+
+.update-error {
+  margin: 10px 20px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #FFF8F0;
+  border: 1px solid rgba(107, 66, 38, .22);
+  color: #A94442;
+  font-size: 13px;
+}
+
+.update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px 18px;
+}
+
+.update-actions button {
+  min-width: 96px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.update-actions .btn-approve,
+.update-progress-actions .btn-approve {
+  background: #D4823A;
+  color: #3A2A1A;
+  font-weight: 600;
+}
+
+.update-actions .btn-reject {
+  background: transparent;
+  border-color: #D2B48C;
+  color: #8B5E3C;
+}
+
+.update-progress-actions .btn-small {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+/* 左下角固定进度条 */
+.update-progress {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: min(320px, calc(100vw - 36px));
+  background: #FFF8F0;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(107, 66, 38, .2);
+  padding: 12px 14px;
+  z-index: 2900;
+}
+
+.update-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6B4226;
+  margin-bottom: 8px;
+}
+
+#update-progress-pct { color: #D4823A; font-weight: 700; }
+
+.update-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #F5EDE3;
+  overflow: hidden;
+}
+
+.update-progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #D4823A, #A67B5B);
+  transition: width .2s ease;
+}
+
+.update-progress-actions { margin-top: 10px; }
+
+/* ---------- 自动更新 ---------- */
+
+.update-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(58, 42, 26, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.update-modal {
+  width: min(560px, 100%);
+  max-height: min(76vh, 640px);
+  display: flex;
+  flex-direction: column;
+  background: #FFF8F0;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(107, 66, 38, .26);
+  overflow: hidden;
+}
+
+.update-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px 6px;
+}
+
+.update-header h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #6B4226;
+}
+
+.update-icon { font-size: 20px; }
+
+.update-versions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px 12px;
+  font-size: 14px;
+  color: #8B5E3C;
+}
+
+.update-from { opacity: .7; }
+.update-arrow { color: #D4823A; font-weight: 700; }
+.update-to { color: #D4823A; font-weight: 700; }
+
+.update-notes-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+
+.update-notes-label {
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: #A67B5B;
+  margin-bottom: 6px;
+}
+
+.update-notes {
+  flex: 1;
+  min-height: 120px;
+  overflow-y: auto;
+  background: #F5EDE3;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.62;
+  color: #6B4226;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.update-notes h1, .update-notes h2, .update-notes h3 {
+  font-size: 14px;
+  margin: 12px 0 6px;
+  color: #6B4226;
+}
+
+.update-notes ul { margin: 6px 0; padding-left: 20px; }
+.update-notes li { margin: 3px 0; }
+.update-notes code {
+  background: #F5EDE3;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 12px;
+}
+
+.update-error {
+  margin: 10px 20px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #FFF8F0;
+  border: 1px solid rgba(107, 66, 38, .22);
+  color: #A94442;
+  font-size: 13px;
+}
+
+.update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px 18px;
+}
+
+.update-actions button {
+  min-width: 96px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.update-actions .btn-approve,
+.update-progress-actions .btn-approve {
+  background: #D4823A;
+  color: #3A2A1A;
+  font-weight: 600;
+}
+
+.update-actions .btn-reject {
+  background: transparent;
+  border-color: #D2B48C;
+  color: #8B5E3C;
+}
+
+.update-progress-actions .btn-small {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+/* 左下角固定进度条 */
+.update-progress {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: min(320px, calc(100vw - 36px));
+  background: #FFF8F0;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(107, 66, 38, .2);
+  padding: 12px 14px;
+  z-index: 2900;
+}
+
+.update-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6B4226;
+  margin-bottom: 8px;
+}
+
+#update-progress-pct { color: #D4823A; font-weight: 700; }
+
+.update-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #F5EDE3;
+  overflow: hidden;
+}
+
+.update-progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #D4823A, #A67B5B);
+  transition: width .2s ease;
+}
+
+.update-progress-actions { margin-top: 10px; }
+
+/* 历史里的工具调用卡片 */
+.tc-history {
+  margin: 10px 0 10px 2px;
+  border-left: 3px solid #D2B48C;
+  padding-left: 12px;
+}
+
+.tc-history .tc-history-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #8B5E3C;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tc-history .tc-history-name { font-weight: 600; color: #6B4226; }
+.tc-history .tc-history-toggle { margin-left: auto; font-size: 11px; color: #A67B5B; }
+.tc-history details { margin-top: 6px; }
+.tc-history pre {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  background: #F5EDE3;
+  border: 1px solid rgba(166, 123, 91, .32);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6B4226;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow: auto;
+}
+
+
+/* 通道标记：不用 emoji，改用品牌色小圆点 + 文字
+   （BRAND.md：不要过度装饰） */
+.relay-transport {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--light-brown);
+  margin-left: 8px;
+}
+
+.relay-transport::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tan, #D2B48C);
+}
+
+.relay-transport.via-proxy::before { background: var(--orange, #D4823A); }
+.relay-transport.direct::before { background: var(--light-brown, #A67B5B); }
+
+.relay-pair-guard {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--light-brown, #A67B5B);
+}
+
+.update-header h3 { letter-spacing: .01em; }

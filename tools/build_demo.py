@@ -141,10 +141,13 @@ MOCK = r"""
 
   window.fetch = function (input, init) {
     var url = typeof input === 'string' ? input : (input && input.url) || '';
-    if (url.indexOf('127.0.0.1:18765') === -1) {
+    // 前端 API_BASE 现在是相对路径（''），所以这里按「路径是否以 /api/ 开头」
+    // 判断，而不是匹配写死的 127.0.0.1:18765 —— 否则演示页所有请求都会漏到
+    // realFetch，整站交互静默失效。
+    var path = url.replace(/^https?:\/\/[^/]+/, '');
+    if (path.indexOf('/api/') !== 0) {
       return realFetch ? realFetch(input, init) : Promise.reject(new Error('blocked'));
     }
-    var path = url.replace(/^https?:\/\/127\.0\.0\.1:18765/, '');
     var payload = { ok: true };
     var body = {};
     try { body = JSON.parse((init && init.body) || '{}'); } catch (e) {}
@@ -172,6 +175,16 @@ MOCK = r"""
       payload = { ok: true, pending: true };
     } else if (path.indexOf('/api/conversations') === 0) {
       payload = { ok: true, conversations: CONVS };
+    } else if (path.indexOf('/api/version') === 0) {
+      payload = { ok: true, version: '0.0.0.2.1' };
+    } else if (path.indexOf('/api/update/check') === 0) {
+      // 演示页永远不弹更新弹窗（真弹了会挡在正中间，把 demo 毁掉）
+      payload = { ok: true, available: false, current: '0.0.0.2.1', latest: '0.0.0.2.1' };
+    } else if (path.indexOf('/api/relay/') === 0) {
+      // 远程互联面板在演示里只是个样子，别让它报错
+      payload = { ok: true, running: false, connected: false, state: 'stopped',
+                  devices: [], entries: [], pin: null, psk: '', psk_set: false,
+                  psk_problems: [], url: 'wss://mollypaw-online.pages.dev/server' };
     } else if (path.indexOf('/api/balance') === 0) {
       payload = { ok: true, supported: true, currency: 'CNY', balance: 12.83,
                   balances: [{ currency: 'CNY', balance: 12.83 }, { currency: 'USD', balance: 1.76 }] };
@@ -260,7 +273,8 @@ LOCK = r"""
   var realFetch = window.fetch;
   window.fetch = function (input, init) {
     var url = typeof input === 'string' ? input : (input && input.url) || '';
-    if (url.indexOf('/api/chat') !== -1) {
+    var path = url.replace(/^https?:\/\/[^/]+/, '');
+    if (path.indexOf('/api/chat') === 0) {
       toast('\u6f14\u793a\u6a21\u5f0f\u53d1\u4e0d\u51fa\u6d88\u606f');
       return Promise.resolve({ ok: true, status: 200, json: function () { return Promise.resolve({ ok: true, pending: true }); } });
     }

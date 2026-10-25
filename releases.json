@@ -3,6 +3,38 @@
   "snapshot": true,
   "releases": [
     {
+      "tag": "beta-0.0.0.2.1",
+      "name": "MollyPaw 0.0.0.2.1",
+      "published": "2026-10-24T12:25:49Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/beta-0.0.0.2.1",
+      "notes": "### 新增\n\n- **自动更新**：启动后自动检查新版本，弹窗把**更新内容**（就是这份 CHANGELOG）列出来，\n  默认等你点确认才更新。下载进度显示在**左下角进度条**，下完变「重启并安装」，\n  程序自己换 exe 再启动 —— 不用手动去 Release 页面找安装包。\n- **会话历史里的工具调用会完整显示**：工具名、参数、执行结果都在，可折叠展开。\n  以前历史里只渲染用户与助手正文，工具那一轮像凭空消失。\n- **中继连接自动选路**：自动探测系统代理（环境变量 / Windows 注册表），\n  有代理就并发「代理 + 直连」竞速，谁先通用谁；网络抖了就短超时重试。\n- **远程互联面板显示当前通道**：「代理 127.0.0.1:7897」或「直连」，一眼看出走的什么路。\n- **停止按钮真能停**：点下去立刻打断正在读的模型流，不再干等。\n- **发送 / 停止按钮重做成圆形图标**：发送=圆+向上箭头，停止=圆+圆角方块；\n  两个按钮互斥，点停止后方块变转圈，让人知道「已经收到点击、正在打断」。\n- **AI 干活时按 Enter 插入消息**：不打断当前这轮，消息排队，本轮一结束立刻发出去。\n- **连按两次 Esc 停止 AI**，输入框下面有键位提示。\n- **工具调用轮数完全不限**：删掉了 `max_tool_rounds`（原默认 100）和睡眠任务\n  的 `max_llm_calls` 上限 —— 活干到一半被轮数卡住是更常见的问题。\n- **后端也支持中英文**：新增 `agent/i18n.py`，远程互联、更新、余额这些用户能看到的\n  提示按界面语言返回，不再中文界面冒英文。\n\n### 修复\n\n- **中继没连上也能生成配对码**：界面照样给二维码和配对码，手机扫了一直等不到响应。\n  现在中继未连接时「添加设备 / 添加只读设备」直接禁用，并提示先开启远程互联。\n- **桌面端连官方中继无限重连**：`websocket-client` 只认 `http_proxy` 环境变量，\n  完全不读 Windows 系统代理，桌面端一直是裸连。实测到 `pages.dev` 的直连 TLS\n  握手三次里一次 7.1 秒、一次直接超时 —— 于是刚连上就判失败、无限退避，\n  手机端看到的就是「电脑没在线」。现在显式探测代理并按可用路线连接。\n- **点停止后卡在「正在停…」半天**：流式请求的读超时是 300 秒，模型不吐字时\n  读循环一直阻塞，取消检查根本没机会跑。现在取消会直接关掉 HTTP 连接，\n  读操作立刻抛异常并按「已取消」处理（不再显示成「请求失败」）。\n- **界面里还有没翻译的英文**：余额那几条（`Provider has no balance endpoint.`）\n  改成按后端错误码取本地化文案，原始英文放进悬停提示；前端词条补齐到两套一致。\n\n### 变更\n\n- 远程互联的「添加设备」不再只是一次性动作：中继掉线时按钮会跟着禁用，\n  避免用户拿到一张已经作废的二维码。\n\n### 下载\n\n- `MollyPaw.exe`（Windows，可直接从本页面下载，也可用应用内自动更新）\n\n### 验证\n\n- 本地测试通过（含自动更新、版本比较的单元测试）\n- 真实生产环境配对链路验证：PC 连接官方中继 → 生成配对码 → 模拟手机握手 →\n  兑换主密钥 → 双向加密请求，全链路通过\n- 到官方中继的三条线路实测记录：直连 TLS 0.58s / 超时 / 7.11s（不稳定），\n  系统代理 0.63s / 0.70s / 0.69s（稳定）\n\n[0.0.0.2.1]: https://github.com/LK-BLOG/MollyPaw/compare/beta-0.0.0.2.0...beta-0.0.0.2.1",
+      "assets": [
+        {
+          "name": "MollyPaw.exe",
+          "size": 30803360,
+          "downloads": 0,
+          "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/beta-0.0.0.2.1/MollyPaw.exe"
+        }
+      ]
+    },
+    {
+      "tag": "beta-0.0.0.2.0",
+      "name": "MollyPaw 0.0.0.2.0",
+      "published": "2026-10-24T08:10:36Z",
+      "prerelease": true,
+      "url": "https://github.com/LK-BLOG/MollyPaw/releases/tag/beta-0.0.0.2.0",
+      "notes": "远程互联大版本。在 `0.0.0.1.5` 的基础上加了手机 ↔ 电脑互联。\r\n\r\n### 新增\r\n\r\n- **手机 ↔ 电脑远程互联**：装上手机 App，扫电脑上的二维码就能接着用电脑上的 Agent。\r\n  - 手机端：聊天（逐字流式）、工具审批、会话管理、文件浏览下载、紧急停止\r\n  - 电脑端：设置 → 远程互联 → 开启 → 添加设备（二维码 / 配对码）\r\n  - **两种角色**：控制端（全能）/ 观察端（只读，能看能切会话，不能审批不能改设置）\r\n  - 走 Cloudflare 中继，跨局域网也能用（不用同一 WiFi）\r\n- **中继地址可选「官方 / 自建」**：\r\n  - 选官方 → 一键填好，开箱即用\r\n  - 选自建 → 填自己的 Worker 地址\r\n- **端到端加密**：X25519 + HKDF-SHA256 + AES-256-GCM。\r\n  - 中继是盲转发，服务器上看不到任何聊天内容\r\n  - 配对码一次性、15 分钟有效\r\n- **紧急停止**：桌面端和手机端都能中断当前这一轮。\r\n  - 真中断：断流 + 杀掉子进程树 + 回滚本轮历史\r\n- **真流式输出**：逐字返回，不再干等一整坨。\r\n  - 工具调用参数**分片累积、整条流结束才执行**（避免第一个 token 就触发工具）\r\n- **审批不再 120 秒超时** —— 锁屏 10 分钟回来还能点。\r\n\r\n### 修复\r\n\r\n- **填大 `max_tokens` 导致上游 400**：实测 2048000 超了模型上限 262144。\r\n  现在这个参数**默认不发**，只在显式填正数时才带，前端也允许留空。\r\n- **单选按钮偏到整行最右**：全局 `.form-group input { width: 100% }` 把 radio 也当文本框了。\r\n- **界面漏词条**：远程互联面板整片英文，界面直接显示 `relay_copy` 这种原始 key 名。\r\n- **托盘点「显示」抛异常**：`window.focus()` 在 pywebview 里不存在（那是 bool 属性），改用 `window.restore()`。\r\n- **客户端断开时控制台刷 traceback**：`ConnectionResetError` 没被捕获。\r\n- **重复启动会把正在跑的那个杀掉**（Windows）：单实例锁用 `os.kill(pid, 0)` 探活，\r\n  而 Windows 上 `signal.CTRL_C_EVENT == 0`，这个调用实际是往控制台**广播 Ctrl+C** ——\r\n  双击第二次图标，第一个 MollyPaw 直接被打断退出，同控制台的终端也跟着中断。\r\n  现在 Windows 改用 `OpenProcess` + `GetExitCodeProcess` 探活，不再碰目标进程。\r\n\r\n### 变更\r\n\r\n- 配对流程去掉了 6 位 PIN 和 PBKDF2，改成一键配对码。\r\n  原来的 PIN 必须明文送进配对帧，服务端解密后直接读到 —— 同一帧里既有 PIN\r\n  又有用 PIN 算的 proof，等于自己验自己。\r\n- 移除 `PLAN.md`（内容早已过时），版本号改由 tag 决定。\r\n\r\n### 下载\r\n\r\n- `MollyPaw.exe`（Windows）\r\n\r\n### 验证\r\n\r\n- 本地 290 项测试通过（联网测试单独跑）\r\n- 中继端到端冒烟 11/11 通过（含\"手机只有配对码不知 PSK 也能连\"、\"伪造码被拒\"、\"配对码一次性\"）\r\n- 跨实现一致性：Python 端与 Android 端加密结果逐字节相同\r\n- 跨平台 CI：Ubuntu / Windows / macOS × Python 3.10-3.12\r\n\r\n[0.0.0.2.0]: https://github.com/LK-BLOG/MollyPaw/compare/beta-0.0.0.1.5...beta-0.0.0.2.0",
+      "assets": [
+        {
+          "name": "MollyPaw.exe",
+          "size": 30751335,
+          "downloads": 32,
+          "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/beta-0.0.0.2.0/MollyPaw.exe"
+        }
+      ]
+    },
+    {
       "tag": "beta-0.0.0.1.5",
       "name": "MollyPaw Beta 0.0.0.1.5",
       "published": "2026-09-14T11:34:00Z",
@@ -13,7 +45,7 @@
         {
           "name": "MollyPaw.exe",
           "size": 28218810,
-          "downloads": 1,
+          "downloads": 733,
           "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/beta-0.0.0.1.5/MollyPaw.exe"
         }
       ]
@@ -29,7 +61,7 @@
         {
           "name": "MollyPaw.exe",
           "size": 70730878,
-          "downloads": 1,
+          "downloads": 3,
           "url": "https://github.com/LK-BLOG/MollyPaw/releases/download/Beta-0.0.0.1.4/MollyPaw.exe"
         }
       ]

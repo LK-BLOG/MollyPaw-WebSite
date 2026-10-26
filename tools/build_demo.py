@@ -198,7 +198,14 @@ MOCK = r"""
         { id: 'custom', display_name: 'Custom', base_url: '', protocol: 'chat' }
       ] };
     } else if (path.indexOf('/api/sleep') === 0) {
-      payload = { ok: true, settings: { mode: 'off', tasks: ['memory', 'review', 'dream'], max_llm_calls: 100 } };
+      // 注意键名是 sleep + status（跟后端 GET /api/sleep 一致）；
+      // 以前写的是 settings，演示页里睡眠面板永远是空的。
+      payload = { ok: true,
+                  sleep: { mode: 'off', tasks: ['memory', 'review', 'dream'], idle_minutes: 10 },
+                  status: { state: 'awake', idle_minutes: 10 } };
+    } else if (path.indexOf('/api/processes') === 0) {
+      // 演示页永远没有后台进程
+      payload = { ok: true, count: 0, items: [] };
     } else if (path.indexOf('/api/config') === 0) {
       payload = { ok: true, config: {
         provider_id: 'deepseek', model: 'deepseek-flash', base_url: 'https://api.deepseek.com/v1',

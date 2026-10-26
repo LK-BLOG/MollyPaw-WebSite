@@ -172,7 +172,14 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
         { id: 'custom', display_name: 'Custom', base_url: '', protocol: 'chat' }
       ] };
     } else if (path.indexOf('/api/sleep') === 0) {
-      payload = { ok: true, settings: { mode: 'off', tasks: ['memory', 'review', 'dream'], max_llm_calls: 100 } };
+      // 注意键名是 sleep + status（跟后端 GET /api/sleep 一致）；
+      // 以前写的是 settings，演示页里睡眠面板永远是空的。
+      payload = { ok: true,
+                  sleep: { mode: 'off', tasks: ['memory', 'review', 'dream'], idle_minutes: 10 },
+                  status: { state: 'awake', idle_minutes: 10 } };
+    } else if (path.indexOf('/api/processes') === 0) {
+      // 演示页永远没有后台进程
+      payload = { ok: true, count: 0, items: [] };
     } else if (path.indexOf('/api/config') === 0) {
       payload = { ok: true, config: {
         provider_id: 'deepseek', model: 'deepseek-flash', base_url: 'https://api.deepseek.com/v1',
@@ -339,6 +346,14 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
           <kbd>Esc</kbd><kbd>Esc</kbd> <span data-i18n="kbd_hint_stop">连按两次 Esc 停止 AI</span>
         </span>
         <span id="queue-hint" class="queue-hint" hidden></span>
+      </div>
+      <!-- 后台进程提示：点了停止之后命令没被杀，转后台继续跑。
+           这里是给用户看的出口 —— 他不想让它们继续跑，可以直接杀。 -->
+      <div id="bg-notice" class="bg-notice" hidden>
+        <span class="bg-notice-dot" aria-hidden="true"></span>
+        <span id="bg-notice-text" class="bg-notice-text"></span>
+        <button id="bg-kill" class="bg-notice-btn" type="button"
+                data-i18n="bg_kill_all">全部终止</button>
       </div>
       <p class="input-hint" data-i18n="hint">MollyPaw Beta 0.0.0.1.5</p>
     </div>
@@ -567,6 +582,11 @@ html body { padding-top: 34px; box-sizing: border-box; height: 100vh; }
               <option value="display_only">只显示</option>
               <option value="full">完整</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label for="cfg-sleep-idle" data-i18n="sleep_idle">空闲多少分钟后整理</label>
+            <input id="cfg-sleep-idle" type="number" min="0.5" step="0.5" value="10">
+            <small class="form-hint" data-i18n="sleep_idle_hint">这段时间里没有任何操作才会开始，你在用就不会整理。</small>
           </div>
           <div class="form-group">
             <label>整理任务</label>
